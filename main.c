@@ -114,10 +114,8 @@ int menu_principal()
     int i;
     printf("MENU\n\n");
     printf("1 - Créer un compte\n");
-    printf("2 - Delete database \n");
-    printf("3 - ...\n");
-    printf("4 - ...\n");
-    printf("5 - ...\n\n");
+    printf("2 - Supprimer eleves \n");
+    printf("3 - Supprimer users\n");
     printf("Choose: ");
     scanf("%d",&i);
     printf("\n\n");
@@ -137,7 +135,7 @@ int menu_type_user()
     return i;
 }
 
-int delete_database(MYSQL *con)  // OK
+int supprimer_eleves(MYSQL *con)  // OK
 {
     if (mysql_query(con, "DELETE FROM Eleves WHERE el_id > 1;"))
     {
@@ -152,7 +150,20 @@ int delete_database(MYSQL *con)  // OK
     return(1);
 }
 
-
+int supprimer_users(MYSQL *con)  // OK
+{
+    if (mysql_query(con, "DELETE FROM Utilisateurs WHERE user_id > 1;"))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return(1);
+    }
+    if(mysql_query(con, "ALTER TABLE Utilisateurs AUTO_INCREMENT = 1;"))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return(1);
+    }
+    return(1);
+}
 
 int main()
 {
@@ -179,7 +190,10 @@ int main()
 			break;
 
 		case 2 :
-			delete_database(con);
+			supprimer_eleves(con);
+			break;
+		case 3:
+			supprimer_users(con);
 			break;
     }
 
