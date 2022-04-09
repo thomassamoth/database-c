@@ -20,30 +20,77 @@ struct Utilisateur
 {
     char nom [30];
     char prenom[30];
-    char username[30];
+    char pseudo[30];
     char password[30];
-    char status[30]; // permissions
+    char statut[30]; // permissions
 };
+
+void verif_enseignant(struct Utilisateur user, char confirm_enseignant)
+{
+
+}
+
+
+void connexion_utilisateur(MYSQL *con)
+{
+	//struct Utilisateur user;
+	char pseudo [30];
+	char request [100];
+	//char resultat[50];
+	printf("== Connexion == \n");
+	printf("\tEntrer votre pseudo : ");
+	scanf("%s", pseudo);
+	sprintf(request, "SELECT user_password FROM Utilisateurs WHERE user_pseudo = '%s'", pseudo);
+	//printf(request);
+	//resultat = mysql(con, request);
+	//printf("%s", resultat);
+	if(mysql_query(con, request))
+	{
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return 1;
+    }
+
+    //int num_fields = mysql_num_fields(con);
+    MYSQL_RES *result = mysql_store_result(con);
+    printf("Result : %s\n ", result);
+    if (result == NULL)
+    {
+        return(1);
+    }
+    //on récupère le nombre de champs
+    int num_fields = mysql_num_fields(result);
+
+    MYSQL_ROW row;
+
+    while ((row = mysql_fetch_row(result)))
+    {
+        for(int i = 0; i < num_fields; i++)
+        {
+            printf("%s ", row[i] ? row[i] : "null");
+        }
+        printf("\n");
+    }
+
+    mysql_free_result(result);
+    //return(mysql_query(con, request));
+}
+
 
 struct Utilisateur ajouter_utilisateur() //OK
 {
     char password [30] = "0";
-    char confirm_enseignant [30] = "code_prof";
-    char confirm_secretariat [30] = "code_sec";
+    char confirm_enseignant [10] = "code_prof";
+    char confirm_secretariat [10] = "code_sec";
     struct Utilisateur user;
 
     printf(" == CREATION USER ==");
     printf("\n\tEcrivez le nom: ");
-    __fpurge(stdin);
     scanf("%s", user.nom);
     printf ("\tEcrivez le prenom: ");
-    __fpurge(stdin);
     scanf("%s", user.prenom);
     printf("\tEntrer votre pseudo : ");
-    __fpurge(stdin);
-    scanf("%s", user.username);
+    scanf("%s", user.pseudo);
     printf("\tEntrer un mot de passe : ");
-    __fpurge(stdin);
     scanf("%s", user.password);
 
     while(strcmp(user.password, password) != 0) // confirmer mot de passe
@@ -58,8 +105,9 @@ struct Utilisateur ajouter_utilisateur() //OK
     switch(menu_user)
     {
 		case 1: // Eleves
-			strcpy(user.status, "Eleve");
+			strcpy(user.statut, "Eleve");
 			break;
+
 		case 2: // Enseignant
 			printf("Entrer le code de validation reçu : ");
 			char code[30] = "0";
@@ -70,9 +118,9 @@ struct Utilisateur ajouter_utilisateur() //OK
 				scanf("%s", code);
 				strcpy(code, confirm_enseignant);
 			}
-			strcpy(user.status, "Enseignant");
-			printf("Utilisateur de type : %s", user.status);
-
+			strcpy(user.statut, "Enseignant");
+			printf("Utilisateur de type : %s", user.statut);
+					//verif_enseignant(user, confirm_enseignant);
 			break;
 		case 3: // Secretariat
 			printf("Entrer le code de validation reçu : ");
@@ -83,8 +131,8 @@ struct Utilisateur ajouter_utilisateur() //OK
 				printf("Entrer le code de validation reçu : ");
 				scanf("%s", code2);
 			}
-			strcpy(user.status, "Secretariat");
-			printf("Utilisateur de type : %s", user.status);
+			strcpy(user.statut, "Secretariat");
+			printf("Utilisateur de type : %s", user.statut);
 
 			break;
     }
@@ -99,7 +147,7 @@ void add_user_database(MYSQL *con)
     struct Utilisateur utilisateur;
     utilisateur = ajouter_utilisateur();
 
-    sprintf(request, "INSERT INTO Utilisateurs(user_nom, user_prenom,user_status, user_usrname, user_password) VALUES ('%s', '%s', '%s', '%s', '%s');", utilisateur.nom, utilisateur.prenom, utilisateur.status, utilisateur.username, utilisateur.password);
+    sprintf(request, "INSERT INTO Utilisateurs(user_nom, user_prenom,user_statut, user_pseudo, user_password) VALUES ('%s', '%s', '%s', '%s', '%s');", utilisateur.nom, utilisateur.prenom, utilisateur.statut, utilisateur.pseudo, utilisateur.password);
 
 	if (mysql_query(con, request))
 	{
@@ -116,6 +164,7 @@ int menu_principal()
     printf("1 - Créer un compte\n");
     printf("2 - Supprimer eleves \n");
     printf("3 - Supprimer users\n");
+    printf("4 - Connexion user\n");
     printf("Choose: ");
     scanf("%d",&i);
     printf("\n\n");
@@ -195,10 +244,14 @@ int main()
 		case 3:
 			supprimer_users(con);
 			break;
+
+		case 4:
+			connexion_utilisateur(con);
+			break;
     }
 
     // Lecture des données
-    if (mysql_query(con, "SELECT * FROM Eleves"))
+    if (mysql_query(con, "SELECT * FROM Eleves;"))
     {
         return(1);
     }
