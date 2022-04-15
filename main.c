@@ -25,7 +25,28 @@ struct Utilisateur
     char password[30];
     char statut[30]; // permissions
 };
+int menu_classe()
+{
+    int i;
+    printf("En quelle classe êtes-vous ?\n");
+    printf("\t1 - Mauve\n");
+    printf("\t2 - Bleue\n");
+    printf("\t3 - Ivoire\n");
+    printf("\t4 - Verte\n");
+    printf("Choix : ");
+    scanf("%d",&i);
+    printf("\n\n");
+    return i;
+}
 
+void ajouter_classe() // ajouter classe dans la bdd
+{
+//get the id
+// link the id in the classe personne table
+
+
+
+}
 int connexion_utilisateur(MYSQL *con)
 {
     struct Utilisateur user;
@@ -139,6 +160,7 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
     {
     case 1: // Eleves
         strcpy(user.statut, "Eleve");
+        int classe = menu_classe();
         break;
 
     case 2: // Enseignant
@@ -169,8 +191,6 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
         printf("Utilisateur de type : %s", user.statut);
         break;
     }
-	//*pseudo = modifier_pseudo(con, user);
-    //strcpy(user.pseudo, pseudo);
     return  user;
 }
 
