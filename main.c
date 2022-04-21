@@ -103,42 +103,43 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans 
 int connexion_utilisateur(MYSQL *con)
 {
     struct Utilisateur user;
-    char request [100];
+    char request [500];
     char mot_de_passe [60];
     char asked_password [60];
+    int correspondance;
 
     printf("== Connexion == \n");
     printf("\tEntrer votre pseudo : ");
     scanf("%s", user.pseudo);
-    sprintf(request, "SELECT user_password FROM Utilisateurs WHERE user_pseudo = '%s'", user.pseudo);
+    printf("\tEntrer votre mot de passe : ");
+    scanf("%s", mot_de_passe);
+    sprintf(request, "SELECT count(user_id) FROM Utilisateurs WHERE user_pseudo  = '%s' AND user_password = '%s';", user.pseudo, mot_de_passe);
 
-    if(mysql_query(con, request))
-    {
+    if(mysql_query(con, request)){
         fprintf(stderr, "%s\n", mysql_error(con));
         return 1;
     }
 
     MYSQL_RES *result = mysql_use_result(con);
-    if (result == NULL)
-    {
+    if (result == NULL){
         return(1);
     }
     int num_fields = mysql_num_fields(result);
-
     MYSQL_ROW row;
     while ((row = mysql_fetch_row(result))){
-        for(int i = 0; i < num_fields; i++)
-        {
-            printf("%s \n", row[i] ? row[i] : "null");
-            strcpy(mot_de_passe, row[i]);
+        for(int i = 0; i < num_fields; i++){
+			correspondance = atoi(row[i]); //conversion entier
         }
     }
-    /* -- Vérification du mot de passe -- */
-    while(strcmp(mot_de_passe, asked_password) != 0)
-    {
-    	printf("\tConfirmer le mot de passe : ");
-        scanf("%s", asked_password);
-    }
+	/* -- Conditions -- */
+	if(correspondance == 0)
+	{
+		printf("Informations de connexion érronées. Veuillez réessayer !\n");
+		connexion_utilisateur(con);
+	}
+	else
+		printf("Connexion établie\n");
+
     mysql_free_result(result);
 }
 
@@ -203,7 +204,6 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
     {
 		case 1: // Eleves
 			strcpy(user.statut, "Eleve");
-
 			break;
 
 		case 2: // Enseignant
