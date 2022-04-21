@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include<string.h>
 
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
+
 //char host[15] = "localhost";
 //char user[15] = "esigelec";
 //char password[15] = "esigelec";
@@ -40,33 +45,43 @@ int menu_classe()
     return i;
 }
 
-void ajouter_classe(MYSQL *con, int menu, struct Utilisateur user) // ajouter classe dans la bdd
-{
-	char *request[100];
 
-	//on récupère l'id de l'utilisateur
-	sprintf(request, "SELECT user_id FROM Utilisateurs WHERE user_nom = '%s' AND user_prenom = '%s';", user.nom, user.prenom);
-	if (mysql_query(con, request))
-    {
+int get_id(MYSQL *con, struct Utilisateur user){ //OK
+	/* Retourne l'id de l'utilisateur souhaité */
+	char request [200];
+	int id;
+	sprintf(request, "SELECT user_id FROM Utilisateurs WHERE user_prenom = '%s' AND user_nom = '%s';", user.prenom, user.nom);
+	if(mysql_query(con, request)){
         fprintf(stderr, "%s\n", mysql_error(con));
         return;
     }
+
     MYSQL_RES *result = mysql_use_result(con);
     if (result == NULL){
         return(1);
     }
-    int num_fields = mysql_num_fields(result);
+	int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
-
-    while ((row = mysql_fetch_row(result)))
-    {
-        for(int i = 0; i < num_fields; i++)
-        {
-            printf("Votre id est %d ", row[i] ? row[i] : "null");
+    while ((row = mysql_fetch_row(result))){
+        for(int i = 0; i < num_fields; i++){
+			id = atoi(row[i]); //conversion en entier
         }
-        printf("\n");
     }
+    return id;
+}
 
+void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans la bdd
+{
+	char *request[100];
+	int classe = menu_classe(); // on affiche le menu des classes
+	int id = get_id(con, user); //on récupère l'id
+
+	/* -- Requete -- */
+	sprintf(request, "INSERT INTO Personne_Classe VALUES(%d, %d);", id, classe);
+	if (mysql_query(con, request)){
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return;
+	}
 }
 
 int connexion_utilisateur(MYSQL *con)
@@ -86,53 +101,41 @@ int connexion_utilisateur(MYSQL *con)
     }
 
     MYSQL_RES *result = mysql_use_result(con);
-
-    //printf("Pointer : %s", result);
-    //printf("Result : %p\n ", &result); //affichage du mot de passe
     if (result == NULL)
     {
         return(1);
     }
-    //printf("Recup result %s ", result);
-    //on récupère le nombre de champs
     int num_fields = mysql_num_fields(result);
 
     MYSQL_ROW row;
-
-    while ((row = mysql_fetch_row(result)))
-    {
-        for(int i = 0; i < num_fields; i++)
-        {
+    while ((row = mysql_fetch_row(result))){
+        for(int i = 0; i < num_fields; i++){
             printf("%s ", row[i] ? row[i] : "null");
         }
-        //printf("\n");
     }
-    /* == VERIF MOT DE PASSE ==
-    //printf("%s", result);
-    while(strcmp(result, password) != 0)
+    /* -- Vérification du mot de passe -- */
+    /*while(strcmp(result, password) != 0)
     {
     	printf("\tConfirmer le mot de passe : ");
         scanf("%s", password);
-    }
-    */
+    }*/
     mysql_free_result(result);
 }
 
-void modifier_pseudo(MYSQL *con, struct Utilisateur user)
+void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
 {
     char *request [500];
-    char *aff_pseudo[100]; // requete pour afficher le pseudo
-    sprintf(request, "UPDATE Utilisateurs SET user_pseudo = concat(lower(user_prenom),'.',lower(user_nom)) WHERE user_nom = '%s' AND user_prenom ='%s';", user.nom, user.prenom);
-    if (mysql_query(con, request))
-    {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return;
-    }
+    char *aff_pseudo[100];
 
-    /* Affichage du pseudo */
+    /* -- Ajout pseudo à la bdd -- */
+    sprintf(request, "UPDATE Utilisateurs SET user_pseudo = concat(lower(user_prenom),'.',lower(user_nom)) WHERE user_nom = '%s' AND user_prenom ='%s';", user.nom, user.prenom);
+    if (mysql_query(con, request)){
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return;}
+
+    /* -- Affichage du pseudo -- */
     sprintf(aff_pseudo, "SELECT user_pseudo FROM Utilisateurs WHERE user_prenom = '%s' AND user_nom = '%s' ",user.prenom, user.nom);
-    if(mysql_query(con, aff_pseudo))
-    {
+    if(mysql_query(con, aff_pseudo)){
         fprintf(stderr, "%s\n", mysql_error(con));
         return;
     }
@@ -143,11 +146,9 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user)
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
 
-    while ((row = mysql_fetch_row(result)))
-    {
-        for(int i = 0; i < num_fields; i++)
-        {
-            printf("Votre identifiant est %s \n", row[i] ? row[i] : "null");
+    while ((row = mysql_fetch_row(result))){
+        for(int i = 0; i < num_fields; i++){
+            printf("Votre identifiant est " ANSI_COLOR_CYAN  "%s\n" ANSI_COLOR_RESET, row[i] ? row[i] : "null"); // affichage en couleur cyan :-)
         }
         printf("\n");
     }
@@ -182,7 +183,7 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
     {
 		case 1: // Eleves
 			strcpy(user.statut, "Eleve");
-			int classe = menu_classe();
+
 			break;
 
 		case 2: // Enseignant
@@ -218,31 +219,6 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
     return  user;
 }
 
-
-int get_id(MYSQL *con, struct Utilisateur user){ //OK
-	/* Retourne l'id de l'utilisateur souhaité */
-	char request [200];
-	int id;
-	sprintf(request, "SELECT user_id FROM Utilisateurs WHERE user_prenom = '%s' AND user_nom = '%s';", user.prenom, user.nom);
-	if(mysql_query(con, request)){
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return;
-    }
-
-    MYSQL_RES *result = mysql_use_result(con);
-    if (result == NULL){
-        return(1);
-    }
-	int num_fields = mysql_num_fields(result);
-    MYSQL_ROW row;
-    while ((row = mysql_fetch_row(result))){
-        for(int i = 0; i < num_fields; i++){
-			id = atoi(row[i]); //conversion en entier
-        }
-    }
-    return id;
-}
-
 void add_user_database(MYSQL *con)
 {
     char request [1000];
@@ -262,9 +238,7 @@ void add_user_database(MYSQL *con)
 
     if(strcmp(utilisateur.statut, "Eleve") == 0)
     {
-		 id = get_id(con, utilisateur);
-		 sprintf(request, "INSERT INTO ")
-
+		 ajouter_classe(con, utilisateur);
     }
     printf("%s %s a bien été ajouté à la base de données !\n", utilisateur.prenom, utilisateur.nom);
 }
