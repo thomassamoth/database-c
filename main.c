@@ -25,6 +25,7 @@ struct Utilisateur
     char password[30];
     char statut[30]; // permissions
 };
+
 int menu_classe()
 {
     int i;
@@ -67,6 +68,7 @@ void ajouter_classe(MYSQL *con, int menu, struct Utilisateur user) // ajouter cl
     }
 
 }
+
 int connexion_utilisateur(MYSQL *con)
 {
     struct Utilisateur user;
@@ -167,71 +169,107 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
     printf("\tEntrer un mot de passe : ");
     scanf("%s", user.password);
 
-    while(strcmp(user.password, password) != 0) // confirmation mot de passe
-    {
+	/* -- Confirmation mot de passe --*/
+    while(strcmp(user.password, password) != 0){
         printf("\tConfirmer le mot de passe : ");
         scanf("%s", password);
     }
     strcpy(user.password, password);
 
-    // choix des permissions
+    /* -- Choix des permissions --*/
     int menu_user =  menu_type_user();
     switch(menu_user)
     {
-    case 1: // Eleves
-        strcpy(user.statut, "Eleve");
-        int classe = menu_classe();
-        break;
+		case 1: // Eleves
+			strcpy(user.statut, "Eleve");
+			int classe = menu_classe();
+			break;
 
-    case 2: // Enseignant
-        printf("Entrer le code de validation reçu : ");
-        char code[30] = "0";
-        scanf("%s", code);
-        while(strcmp(code, confirm_enseignant) != 0) // verification code enseignant
-        {
-            printf("Entrer le code de validation reçu : ");
-            scanf("%s", code);
-            strcpy(code, confirm_enseignant);
-        }
-        strcpy(user.statut, "Enseignant");
-        printf("Utilisateur de type : %s", user.statut);
-        //verif_enseignant(user, confirm_enseignant);
-        break;
+		case 2: // Enseignant
+			printf("Entrer le code de validation reçu : ");
+			char code[30] = "0";
+			scanf("%s", code);
+			/* Vérification code enseignant */
+			while(strcmp(code, confirm_enseignant) != 0)
+			{
+				printf("Entrer le code de validation reçu : ");
+				scanf("%s", code);
+				strcpy(code, confirm_enseignant);
+			}
+			strcpy(user.statut, "Enseignant");
+			printf("Utilisateur de type : %s", user.statut);
+			//verif_enseignant(user, confirm_enseignant);
+			break;
 
-    case 3: // Secretariat
-        printf("Entrer le code de validation reçu : ");
-        char code2[30] = "0";
-        scanf("%s", code2);
-        while(strcmp(code2, confirm_secretariat) != 0)
-        {
-            printf("Entrer le code de validation reçu : ");
-            scanf("%s", code2);
-        }
-        strcpy(user.statut, "Secretariat");
-        printf("Utilisateur de type : %s", user.statut);
-        break;
-    }
+		case 3: // Secretariat
+			printf("Entrer le code de validation reçu : ");
+			char code2[30] = "0";
+			/* Vérification code secretariat */
+			scanf("%s", code2);
+			while(strcmp(code2, confirm_secretariat) != 0)
+			{
+				printf("Entrer le code de validation reçu : ");
+				scanf("%s", code2);
+			}
+			strcpy(user.statut, "Secretariat");
+			printf("Utilisateur de type : %s", user.statut);
+			break;
+	}
     return  user;
 }
 
 
+int get_id(MYSQL *con, struct Utilisateur user){ //OK
+	/* Retourne l'id de l'utilisateur souhaité */
+	char request [200];
+	int id;
+	sprintf(request, "SELECT user_id FROM Utilisateurs WHERE user_prenom = '%s' AND user_nom = '%s';", user.prenom, user.nom);
+	if(mysql_query(con, request)){
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return;
+    }
+
+    MYSQL_RES *result = mysql_use_result(con);
+    if (result == NULL){
+        return(1);
+    }
+	int num_fields = mysql_num_fields(result);
+    MYSQL_ROW row;
+    while ((row = mysql_fetch_row(result))){
+        for(int i = 0; i < num_fields; i++){
+			id = atoi(row[i]); //conversion en entier
+        }
+    }
+    return id;
+}
+
 void add_user_database(MYSQL *con)
 {
     char request [1000];
+    int id;
     struct Utilisateur utilisateur;
     utilisateur = ajouter_utilisateur(con);
 
+	/* -- Ajout à la bdd -- */
     sprintf(request, "INSERT INTO Utilisateurs(user_nom, user_prenom, user_statut, user_password) VALUES ('%s', '%s', '%s', '%s');", utilisateur.nom, utilisateur.prenom, utilisateur.statut, utilisateur.password);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
         return;
     }
+    /* -- Creation pseudo -- */
     modifier_pseudo(con, utilisateur);
-    //if(strcmp(utilisateur.statut, "")
+
+    if(strcmp(utilisateur.statut, "Eleve") == 0)
+    {
+		 id = get_id(con, utilisateur);
+		 sprintf(request, "INSERT INTO ")
+
+    }
+    printf("%s %s a bien été ajouté à la base de données !\n", utilisateur.prenom, utilisateur.nom);
 }
 
-void modifier_password(MYSQL *con)
+/*void modifier_password(MYSQL *con)
 {
     char request[500];
     char new_password[30];
@@ -245,6 +283,7 @@ void modifier_password(MYSQL *con)
     }
     printf("Le mot de passe a été mis à jour avec succès !");
 }
+*/
 
 int menu_principal()
 {
@@ -280,8 +319,7 @@ int supprimer_users(MYSQL *con)  // OK
     printf("A partir de quel id voulez-vous supprimer les élèves ?");
     scanf("%d", &indice);
     sprintf(request, "DELETE FROM Utilisateurs WHERE user_id > %d", indice);
-    if (mysql_query(con, request))
-    {
+    if (mysql_query(con, request)){
         fprintf(stderr, "%s\n", mysql_error(con));
         return(1);
     }
@@ -292,15 +330,14 @@ int supprimer_users(MYSQL *con)  // OK
         fprintf(stderr, "%s\n", mysql_error(con));
         return(1);
     }
-    printf("Utilisateurs supprimés");
+    printf("Utilisateurs supprimés\n");
     return(1);
 }
 
 int main()
 {
-    struct Utilisateur user;
     MYSQL *con = mysql_init(NULL);
-    int menu;
+    int main_menu;
 
     if (con == NULL)
     {
@@ -315,28 +352,27 @@ int main()
 	/* == MAIN MENU == */
 	do
 	{
+		main_menu = menu_principal();
+		switch(main_menu)
+		{
+		case 1 :
+			add_user_database(con);
+			break;
 
-    menu = menu_principal();
-    switch(menu)
-    {
-    case 1 :
-        add_user_database(con);
-        break;
+		case 2:
+			supprimer_users(con);
+			break;
 
-    case 2:
-        supprimer_users(con);
-        break;
-
-    case 4:
-        connexion_utilisateur(con);
-        break;
-	case 0:
-		printf("Goodbye!");
-		break;
-	default:
-		printf("Erreur nombre !\n");
-    }
-    }while(menu != 0);
+		case 4:
+			connexion_utilisateur(con);
+			break;
+		case 0:
+			printf("Goodbye!");
+			break;
+		default:
+			printf("Erreur nombre !\n");
+		}
+    }while(main_menu != 0);
     mysql_close(con);
     return 0;
 }
