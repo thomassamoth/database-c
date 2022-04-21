@@ -7,21 +7,6 @@
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-
-//char host[15] = "localhost";
-//char user[15] = "esigelec";
-//char password[15] = "esigelec";
-
-int menu_type_user();
-
-struct Eleve
-{
-    char nom [30] ;
-    char prenom [30] ;
-    char promo [4] ;
-    char classe [10] ;
-};
-
 struct Utilisateur
 {
     char nom [30];
@@ -30,6 +15,8 @@ struct Utilisateur
     char password[30];
     char statut[30]; // permissions
 };
+
+/* === FONCTIONS MENUS === */
 
 int menu_classe()
 {
@@ -44,6 +31,35 @@ int menu_classe()
     printf("\n\n");
     return i;
 }
+
+int menu_principal()
+{
+    int i;
+    printf("====== MENU ======\n\n");
+    printf("1 - Créer un compte\n");
+    printf("2 - Supprimer users\n");
+    printf("4 - Connexion user\n");
+    printf("0 - QUITTER\n");
+    printf("Choix : ");
+    scanf("%d",&i);
+    printf("\n\n");
+    return i;
+}
+
+int menu_type_user()
+{
+    int i;
+    printf("Quel type d'utilisateur êtes-vous ?\n\n");
+    printf("1 - Eleve\n");
+    printf("2 - Enseignant\n");
+    printf("3 - Secretariat\n");
+    printf("Choix : ");
+    scanf("%d",&i);
+    printf("\n\n");
+    return i;
+}
+
+/* ======================= */
 
 
 int get_id(MYSQL *con, struct Utilisateur user){ //OK
@@ -259,32 +275,6 @@ void add_user_database(MYSQL *con)
 }
 */
 
-int menu_principal()
-{
-    int i;
-    printf("====== MENU ======\n\n");
-    printf("1 - Créer un compte\n");
-    printf("2 - Supprimer users\n");
-    printf("4 - Connexion user\n");
-    printf("0 - QUITTER\n");
-    printf("Choix : ");
-    scanf("%d",&i);
-    printf("\n\n");
-    return i;
-}
-
-int menu_type_user()
-{
-    int i;
-    printf("Quel type d'utilisateur êtes-vous ?\n\n");
-    printf("1 - Eleve\n");
-    printf("2 - Enseignant\n");
-    printf("3 - Secretariat\n");
-    printf("Choix : ");
-    scanf("%d",&i);
-    printf("\n\n");
-    return i;
-}
 
 int supprimer_users(MYSQL *con)  // OK
 {
