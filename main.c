@@ -104,6 +104,8 @@ int connexion_utilisateur(MYSQL *con)
 {
     struct Utilisateur user;
     char request [100];
+    char mot_de_passe [60];
+    char asked_password [60];
 
     printf("== Connexion == \n");
     printf("\tEntrer votre pseudo : ");
@@ -125,16 +127,18 @@ int connexion_utilisateur(MYSQL *con)
 
     MYSQL_ROW row;
     while ((row = mysql_fetch_row(result))){
-        for(int i = 0; i < num_fields; i++){
-            printf("%s ", row[i] ? row[i] : "null");
+        for(int i = 0; i < num_fields; i++)
+        {
+            printf("%s \n", row[i] ? row[i] : "null");
+            strcpy(mot_de_passe, row[i]);
         }
     }
     /* -- Vérification du mot de passe -- */
-    /*while(strcmp(result, password) != 0)
+    while(strcmp(mot_de_passe, asked_password) != 0)
     {
     	printf("\tConfirmer le mot de passe : ");
-        scanf("%s", password);
-    }*/
+        scanf("%s", asked_password);
+    }
     mysql_free_result(result);
 }
 
