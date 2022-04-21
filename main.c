@@ -39,12 +39,32 @@ int menu_classe()
     return i;
 }
 
-void ajouter_classe() // ajouter classe dans la bdd
+void ajouter_classe(MYSQL *con, int menu, struct Utilisateur user) // ajouter classe dans la bdd
 {
-//get the id
-// link the id in the classe personne table
+	char *request[100];
 
+	//on récupère l'id de l'utilisateur
+	sprintf(request, "SELECT user_id FROM Utilisateurs WHERE user_nom = '%s' AND user_prenom = '%s';", user.nom, user.prenom);
+	if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return;
+    }
+    MYSQL_RES *result = mysql_use_result(con);
+    if (result == NULL){
+        return(1);
+    }
+    int num_fields = mysql_num_fields(result);
+    MYSQL_ROW row;
 
+    while ((row = mysql_fetch_row(result)))
+    {
+        for(int i = 0; i < num_fields; i++)
+        {
+            printf("Votre id est %d ", row[i] ? row[i] : "null");
+        }
+        printf("\n");
+    }
 
 }
 int connexion_utilisateur(MYSQL *con)
@@ -125,7 +145,7 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user)
     {
         for(int i = 0; i < num_fields; i++)
         {
-            printf("Votre identifiant est %s ", row[i] ? row[i] : "null");
+            printf("Votre identifiant est %s \n", row[i] ? row[i] : "null");
         }
         printf("\n");
     }
@@ -208,6 +228,7 @@ void add_user_database(MYSQL *con)
         return;
     }
     modifier_pseudo(con, utilisateur);
+    //if(strcmp(utilisateur.statut, "")
 }
 
 void modifier_password(MYSQL *con)
@@ -232,6 +253,7 @@ int menu_principal()
     printf("1 - Créer un compte\n");
     printf("2 - Supprimer users\n");
     printf("4 - Connexion user\n");
+    printf("0 - QUITTER\n");
     printf("Choix : ");
     scanf("%d",&i);
     printf("\n\n");
@@ -278,6 +300,7 @@ int main()
 {
     struct Utilisateur user;
     MYSQL *con = mysql_init(NULL);
+    int menu;
 
     if (con == NULL)
     {
@@ -290,7 +313,10 @@ int main()
         return(1);
     }
 	/* == MAIN MENU == */
-    int menu = menu_principal();
+	do
+	{
+
+    menu = menu_principal();
     switch(menu)
     {
     case 1 :
@@ -304,9 +330,13 @@ int main()
     case 4:
         connexion_utilisateur(con);
         break;
+	case 0:
+		printf("Goodbye!");
+		break;
 	default:
-		printf("Erreur nombre !");
+		printf("Erreur nombre !\n");
     }
+    }while(menu != 0);
     mysql_close(con);
     return 0;
 }
