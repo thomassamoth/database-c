@@ -29,7 +29,7 @@ int menu_classe()
     printf("\t4 - Verte\n");
     printf("Choix : ");
     scanf("%d",&i);
-    printf("\n\n");
+    printf("\n");
     return i;
 }
 
@@ -97,6 +97,13 @@ int menu_type_user()
 
 /* == FONCTIONS == */
 
+void effacer_console()
+{
+	printf("\033[2J\033[1;1H");
+	printf("\n");
+}
+
+
 int get_id(MYSQL *con, struct Utilisateur user)  //OK
 {
     /* Retourne l'id de l'utilisateur souhaité */
@@ -106,7 +113,7 @@ int get_id(MYSQL *con, struct Utilisateur user)  //OK
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        return;
+        return 1;
     }
 
     MYSQL_RES *result = mysql_use_result(con);
@@ -134,7 +141,7 @@ char * get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        return;
+        return 1;
     }
 
     MYSQL_RES *result = mysql_use_result(con);
@@ -156,11 +163,12 @@ char * get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de
 
 void afficher_classe(MYSQL *con)
 {
-	char request [50];
+	char request [500];
 	printf("Quelle classe voulez-vous voir ?\n");
 	int menu_aff_classe = menu_classe();
-	/*
-	sprintf(request, "SELECT concat(user_nom, ' ', user_prenom) FROM Utilisateurs INNER JOIN Personne_Classe ON user_id = id_personne INNER JOIN Classe ON classe_id = class_id WHERE classe_nom = 'Mauve';");
+	sprintf(request, "SELECT concat('Liste des eleves de la classe : ', classe_nom) FROM Classe WHERE classe_id = '%d' UNION \
+			SELECT concat(user_prenom, ' ', upper(user_nom)) FROM Utilisateurs uti INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
+			INNER JOIN Classe cla ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d';", menu_aff_classe, menu_aff_classe); //maxi requète :-)
 	if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -173,21 +181,17 @@ void afficher_classe(MYSQL *con)
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
-
+	effacer_console();
     while ((row = mysql_fetch_row(result)))
     {
         for(int i = 0; i < num_fields; i++)
         {
-            printf(COLOR_WHITE "%s\n" COLOR_RESET, row[i] ? row[i] : "null"); // affichage en couleur cyan :-)
+            printf(COLOR_MAGENTA "%s\n" COLOR_RESET, row[i] ? row[i] : "null");
         }
-    }*/
+    }
+    printf("\n\n");
 }
 
-void effacer_console()
-{
-	printf("\033[2J\033[1;1H");
-	printf("\n");
-}
 
 void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans la bdd
 {
