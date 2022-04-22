@@ -183,6 +183,11 @@ void afficher_classe(MYSQL *con)
     }*/
 }
 
+void effacer_console()
+{
+	printf("\033[2J\033[1;1H");
+	printf("\n");
+}
 
 void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans la bdd
 {
@@ -467,6 +472,7 @@ void add_user_database(MYSQL *con)
     {
         ajouter_classe(con, utilisateur);
     }
+    effacer_console();
     printf(COLOR_MAGENTA " \t%s %s a bien été ajouté à la base de données !\n" COLOR_RESET, utilisateur.prenom, utilisateur.nom);
 }
 
