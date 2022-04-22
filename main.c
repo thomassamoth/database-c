@@ -36,8 +36,6 @@ int menu_principal()
 {
     int i;
     printf("======== MENU ========\n");
-    //printf("1 - Créer un compte\n");
-    //printf("2 - Supprimer users\n");
     printf("1 - Connexion utilisateur\n");
     printf("0 - QUITTER\n");
     printf("Choix : ");
@@ -49,9 +47,10 @@ int menu_principal()
 int menu_secretariat()
 {
 	int i;
-	printf("== Secretariat ==");
-	printf("1. Ajouter utilisateur");
+	printf("== Secretariat ==\n");
+	printf("1. Ajouter utilisateur\n");
 
+	printf("0. Quitter\n");
 	printf("Choix : ");
 	scanf("%d", &i);
 	return i;
@@ -96,11 +95,10 @@ int get_id(MYSQL *con, struct Utilisateur user){ //OK
     return id;
 }
 
-void get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de l'utilisateur
+char  * get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de l'utilisateur
 {
 	char request [200];
-	//char statut[30];
-	int id;
+	char *statut = malloc(30);
 	sprintf(request, "SELECT user_statut FROM Utilisateurs WHERE user_pseudo ='%s';", user.pseudo);
 	if(mysql_query(con, request)){
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -115,10 +113,10 @@ void get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de l
     MYSQL_ROW row;
     while ((row = mysql_fetch_row(result))){
         for(int i = 0; i < num_fields; i++){
-			strcpy(user.statut, row[i]); //conversion en entier
+			strcpy(statut, row[i]); //conversion en entier
         }
     }
-    //return id;
+    return statut;
 
 }
 
@@ -136,13 +134,13 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans 
 	}
 }
 
-int connexion_utilisateur(MYSQL *con)
+void connexion_utilisateur(MYSQL *con)
 {
     struct Utilisateur user;
     char request [500];
     char mot_de_passe [60];
-    char asked_password [60];
     int correspondance;
+    int menu_sec;
 
     printf("== Connexion == \n");
     printf("\tEntrer votre pseudo : ");
@@ -168,17 +166,35 @@ int connexion_utilisateur(MYSQL *con)
         }
     }
 	/* -- Conditions -- */
-	if(correspondance == 0)
-	{
+	if(correspondance == 0) {
 		printf("Informations de connexion érronées. Veuillez réessayer !\n");
 		connexion_utilisateur(con);
 	}
-	else
+	else {
 		printf("Connexion établie\n");
-		get_status(con, user); // get the satus
+		char * statut = get_status(con, user); // on récupère le statut de l'utilisateur
+		printf("%s\n", statut);
+
+		/* -- Menus spécifiques -- */
+		if(strcmp(statut, "Secretariat") == 0) {
+			do
+			{
+				menu_sec = menu_secretariat();
+				switch(menu_sec)
+				{
+					case 1:
+						add_user_database(con); //ajout d'un utilisateur à la bdd
+				}
+
+			}while(menu_sec !=0);
+
+		}
+		free(statut);
+	}
 
     mysql_free_result(result);
 }
+
 
 void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
 {
@@ -212,6 +228,7 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
     }
 }
 
+
 void verif_enseignant(struct Utilisateur user)
 {
 	printf("Entrer le code de validation reçu : ");
@@ -227,9 +244,8 @@ void verif_enseignant(struct Utilisateur user)
 	}
 	strcpy(user.statut, "Enseignant");
 	printf("Utilisateur de type : %s", user.statut);
+	printf("verif enseignant");
 }
-
-
 
 struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
 {
@@ -283,6 +299,7 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
     return  user;
 }
 
+
 void add_user_database(MYSQL *con)
 {
     char request [1000];
@@ -306,6 +323,7 @@ void add_user_database(MYSQL *con)
     }
     printf("%s %s a bien été ajouté à la base de données !\n", utilisateur.prenom, utilisateur.nom);
 }
+
 
 /*void modifier_password(MYSQL *con)
 {
