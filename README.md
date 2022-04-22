@@ -20,5 +20,6 @@ possible à un enseignant de modifier ses appréciations, ...
 
 ### 📝 Autres fonctionnalités 
 - [ ] Un élève peut consulter ses bulletins (année par année / semestre par semestre)
-- [ ] Un utilisateur peut se connecter et accéder aux fonctionnalités disponibles pour son statut
-- [X] Un utilisateur peut se créer un compte
+- [X] Un utilisateur peut se connecter et accéder aux fonctionnalités disponibles pour son statut.  
+*(fonctionnel même si les fonctions ne sont pas encore disponibles)*
+- [X] Une personne du secrétariat peut créer un compte
