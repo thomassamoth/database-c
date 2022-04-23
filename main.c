@@ -7,7 +7,7 @@
 #define COLOR_CYAN    "\x1b[36m"
 #define COLOR_RESET   "\x1b[0m"
 #define COLOR_MAGENTA "\x1b[35m"
-#define COLOR_WHITE   "\x1B[37m"
+#define COLOR_WHITE   "\x1B[97m"
 
 struct Utilisateur
 {
@@ -50,7 +50,7 @@ int menu_eleve()
     int i;
     printf("== Eleve ==\n");
     printf("1.  \n");
-    printf("0. Quitter\n");
+    printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
     return i;
@@ -62,7 +62,7 @@ int menu_secretariat()
     printf("== Secretariat ==\n");
     printf("1. Ajouter utilisateur\n");
     printf("2. Afficher les classes\n");
-    printf("0. Quitter\n");
+    printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
     return i;
@@ -72,9 +72,9 @@ int menu_enseignant()
 {
     int i;
     printf("== Enseignant ==\n");
-    printf("1. Choix 1 enseignant\n");
+    printf("1. Choix 1 - enseignant\n");
 
-    printf("0. Quitter\n");
+    printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
     return i;
@@ -167,8 +167,9 @@ void afficher_classe(MYSQL *con)
 	printf("Quelle classe voulez-vous voir ?\n");
 	int menu_aff_classe = menu_classe();
 	sprintf(request, "SELECT concat('Liste des eleves de la classe : ', classe_nom) FROM Classe WHERE classe_id = '%d' UNION \
-			SELECT concat(user_prenom, ' ', upper(user_nom)) FROM Utilisateurs uti INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
-			INNER JOIN Classe cla ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d';", menu_aff_classe, menu_aff_classe); //maxi requète :-)
+			SELECT concat(user_prenom, ' ', upper(user_nom)) FROM Utilisateurs uti   INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
+			INNER JOIN Classe cla ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
+	printf("%s", request);
 	if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -294,9 +295,9 @@ void connexion_utilisateur(MYSQL *con)
                 switch(menu_el)
                 {
                 case 1:
-                    printf("1. Choix n°1");
+                    printf("1. Choix n°1\n");
                     break;
-				case 0: printf("Quitter\n");
+				case 0: printf("Vous avez bien été déconnecté.e\n");
 					break;
                 default:
                     printf("Erreur !\n");
@@ -316,9 +317,9 @@ void connexion_utilisateur(MYSQL *con)
                 switch(menu_ens)
                 {
                 case 1:
-                    printf("1. Choix n°1");
+                    printf("1. Choix n°1\n");
                     break;
-				case 0: printf("Quitter\n");
+				case 0: printf("Vous avez bien été déconnecté.e\n");
 					break;
                 default:
                     printf("Erreur !");
