@@ -166,10 +166,10 @@ void afficher_classe(MYSQL *con)
 	char request [500];
 	printf("Quelle classe voulez-vous voir ?\n");
 	int menu_aff_classe = menu_classe();
-	sprintf(request, "SELECT concat('Liste des eleves de la classe : ', classe_nom) FROM Classe WHERE classe_id = '%d' UNION \
-			SELECT concat(user_prenom, ' ', upper(user_nom)) FROM Utilisateurs uti   INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
+	sprintf(request, "SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
+			SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs uti   INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
 			INNER JOIN Classe cla ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
-	printf("%s", request);
+
 	if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -194,6 +194,30 @@ void afficher_classe(MYSQL *con)
 }
 
 
+void afficher_nb_eleve(MYSQL *con)
+{
+	/* Affiche le nombre d'élèves -- */
+	if(mysql_query(con, "SELECT COUNT(user_id) FROM Utilisateurs WHERE user_statut = 'Eleve'"))
+	{
+		fprintf(stderr, "%s\n", mysql_error(con));
+	}
+	MYSQL_RES *result = mysql_use_result(con);
+    if (result == NULL)
+    {
+        return(1);
+    }
+    int num_fields = mysql_num_fields(result);
+    MYSQL_ROW row;
+    while ((row = mysql_fetch_row(result)))
+    {
+        for(int i = 0; i < num_fields; i++)
+        {
+			printf("Nombre d'élèves : %d\n", atoi(row[i]));
+		}
+	}
+}
+
+
 void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans la bdd
 {
     char *request[100];
@@ -206,7 +230,7 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans 
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        return;
+        return 1;
     }
 }
 
@@ -225,7 +249,7 @@ void connexion_utilisateur(MYSQL *con)
     scanf("%s", mot_de_passe);
     // on compte le nombre de personnes retournées :
     //si 1: qqn est associé, sinon personne n'est associé et il y a une erreur
-    sprintf(request, "SELECT count(user_id) FROM Utilisateurs WHERE user_pseudo  = '%s' AND user_password = '%s';", user.pseudo, mot_de_passe);
+    sprintf(request, "SELECT count(user_id) FROM Utilisateurs WHERE  user_pseudo  =  BINARY '%s' AND user_password =  BINARY '%s';", user.pseudo, mot_de_passe);
 
     if(mysql_query(con, request))
     {
@@ -524,9 +548,8 @@ int supprimer_users(MYSQL *con)  // OK
 
 int main()
 {
+	/*  == Initialisation Database ==*/
     MYSQL *con = mysql_init(NULL);
-    int main_menu;
-
     if (con == NULL)
     {
         fprintf(stderr, "mysql_init() failed\n");
@@ -537,21 +560,24 @@ int main()
     {
         return(1);
     }
+
     /* == MAIN MENU == */
+    int main_menu;
     do
     {
         main_menu = menu_principal();
         switch(main_menu)
         {
         case 1:
+			effacer_console();
             connexion_utilisateur(con);
             break;
 
         case 0:
-            printf("Goodbye!\n");
+            printf("Au revoir !!\n");
             break;
         default:
-            printf("Erreur nombre !\n");
+            printf("Erreur lors de votre choix ! Veuillez retenter.\n");
         }
     }
     while(main_menu != 0);
