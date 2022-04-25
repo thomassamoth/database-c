@@ -2,12 +2,14 @@
 #include<stdlib.h>
 #include <stdio.h>
 #include<string.h>
+#include <unistd.h> //pause
 
 #define COLOR_RED     "\x1b[31m"
 #define COLOR_CYAN    "\x1b[36m"
 #define COLOR_RESET   "\x1b[0m"
 #define COLOR_MAGENTA "\x1b[35m"
 #define COLOR_WHITE   "\x1B[97m"
+#define BG_CYAN 	  "\u001b[46;1m"
 
 struct Utilisateur
 {
@@ -99,8 +101,8 @@ int menu_type_user()
 
 void effacer_console()
 {
-	printf("\033[2J\033[1;1H");
-	printf("\n");
+    printf("\033[2J\033[1;1H");
+    //printf("\n");
 }
 
 
@@ -133,6 +135,7 @@ int get_id(MYSQL *con, struct Utilisateur user)  //OK
     return id;
 }
 
+
 char * get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de l'utilisateur
 {
     char request [200];
@@ -159,18 +162,19 @@ char * get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de
         }
     }
     return statut;
+    free(statut);
 }
 
 void afficher_classe(MYSQL *con)
 {
-	char request [500];
-	printf("Quelle classe voulez-vous voir ?\n");
-	int menu_aff_classe = menu_classe();
-	sprintf(request, "SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
+    char request [500];
+    printf("Quelle classe voulez-vous voir ?\n");
+    int menu_aff_classe = menu_classe();
+    sprintf(request, "SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
 			SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs uti   INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
 			INNER JOIN Classe cla ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
 
-	if (mysql_query(con, request))
+    if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
         return;
@@ -182,7 +186,7 @@ void afficher_classe(MYSQL *con)
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
-	effacer_console();
+    effacer_console();
     while ((row = mysql_fetch_row(result)))
     {
         for(int i = 0; i < num_fields; i++)
@@ -196,12 +200,12 @@ void afficher_classe(MYSQL *con)
 
 void afficher_nb_eleve(MYSQL *con)
 {
-	/* Affiche le nombre d'élèves -- */
-	if(mysql_query(con, "SELECT COUNT(user_id) FROM Utilisateurs WHERE user_statut = 'Eleve'"))
-	{
-		fprintf(stderr, "%s\n", mysql_error(con));
-	}
-	MYSQL_RES *result = mysql_use_result(con);
+    /* Affiche le nombre d'élèves -- */
+    if(mysql_query(con, "SELECT COUNT(user_id) FROM Utilisateurs WHERE user_statut = 'Eleve'"))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+    }
+    MYSQL_RES *result = mysql_use_result(con);
     if (result == NULL)
     {
         return(1);
@@ -212,9 +216,9 @@ void afficher_nb_eleve(MYSQL *con)
     {
         for(int i = 0; i < num_fields; i++)
         {
-			printf("Nombre d'élèves : %d\n", atoi(row[i]));
-		}
-	}
+            printf("Nombre d'élèves : %d\n", atoi(row[i]));
+        }
+    }
 }
 
 
@@ -235,12 +239,92 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans 
 }
 
 
+void menus_connexion(char * statut, MYSQL *con) //affiche les menus en fonction du type d'utilisateurs
+{
+    int menu_sec, menu_el, menu_ens;
+
+    /* ---- MENUS SPECIFIQUES ---- */
+    /* -- Secretariat -- */
+    if(strcmp(statut, "Secretariat") == 0)
+    {
+        do
+        {
+            menu_sec = menu_secretariat();
+            switch(menu_sec)
+            {
+            case 1:
+				effacer_console();
+                add_user_database(con); //ajout d'un utilisateur à la bdd
+                break;
+            case 2:
+                afficher_classe(con);
+                break;
+            case 0:
+                printf("Quitter\n");
+                break;
+            default :
+                printf("Erreur !\n");
+                break;
+            }
+
+        }
+        while(menu_sec != 0);
+
+    }
+    /* -- Eleve -- */
+    else if(strcmp(statut, "Eleve") == 0)
+    {
+        do
+        {
+            menu_el = menu_eleve();
+            switch(menu_el)
+            {
+            case 1:
+                printf("1. Choix n°1\n");
+                break;
+            case 0:
+                printf("Vous avez bien été déconnecté.e\n");
+                break;
+            default:
+                printf("Erreur !\n");
+                break;
+            }
+
+        }
+        while(menu_el != 0);
+
+    }
+    /* -- Enseignant -- */
+    else if(strcmp(statut, "Enseignant") == 0)
+    {
+        do
+        {
+            menu_ens = menu_enseignant();
+            switch(menu_ens)
+            {
+            case 1:
+                printf("1. Choix n°1\n");
+                break;
+            case 0:
+                printf("Vous avez bien été déconnecté.e\n");
+                break;
+            default:
+                printf("Erreur !");
+            }
+
+        }
+        while(menu_ens != 0);
+
+    }
+    free(statut); // on libère la mémoire de statut
+}
+
 void connexion_utilisateur(MYSQL *con)
 {
     struct Utilisateur user;
     char request [500];
     char mot_de_passe [60];
-    int correspondance, menu_sec, menu_el, menu_ens;
+    int correspondance; //, menu_sec, menu_el, menu_ens;
 
     printf("== Connexion == \n");
     printf("\tEntrer votre pseudo : ");
@@ -274,86 +358,16 @@ void connexion_utilisateur(MYSQL *con)
     /* -- Conditions -- */
     if(correspondance == 0)
     {
-        printf("Informations de connexion erronées. Veuillez réessayer !\n");
+        printf(COLOR_RED "Informations de connexion erronées. Veuillez réessayer !\n" COLOR_RESET);
+        sleep(1);
+        effacer_console();
         connexion_utilisateur(con);
     }
     else
     {
         printf("Connexion établie\n");
         char * statut = get_status(con, user); // on récupère le statut de l'utilisateur
-        //printf("%s\n", statut);
-
-        /* ---- MENUS SPECIFIQUES ---- */
-        /* -- Secretariat -- */
-        if(strcmp(statut, "Secretariat") == 0)
-        {
-            do
-            {
-                menu_sec = menu_secretariat();
-                switch(menu_sec)
-                {
-                case 1:
-                    add_user_database(con); //ajout d'un utilisateur à la bdd
-                    break;
-				case 2:
-					afficher_classe(con);
-					break;
-				case 0:
-					printf("Quitter\n");
-					break;
-                default :
-                    printf("Erreur !\n");
-                    break;
-                }
-
-            }
-            while(menu_sec != 0);
-
-        }
-        /* -- Eleve -- */
-        else if(strcmp(statut, "Eleve") == 0)
-        {
-            do
-            {
-                menu_el = menu_eleve();
-                switch(menu_el)
-                {
-                case 1:
-                    printf("1. Choix n°1\n");
-                    break;
-				case 0: printf("Vous avez bien été déconnecté.e\n");
-					break;
-                default:
-                    printf("Erreur !\n");
-                    break;
-                }
-
-            }
-            while(menu_el != 0);
-
-        }
-        /* -- Enseignant -- */
-        else if(strcmp(statut, "Enseignant") == 0)
-        {
-            do
-            {
-                menu_ens = menu_enseignant();
-                switch(menu_ens)
-                {
-                case 1:
-                    printf("1. Choix n°1\n");
-                    break;
-				case 0: printf("Vous avez bien été déconnecté.e\n");
-					break;
-                default:
-                    printf("Erreur !");
-                }
-
-            }
-            while(menu_ens != 0);
-
-        }
-        free(statut); // on libère la mémoire de statut
+        menus_connexion(statut, con);
     }
     mysql_free_result(result);
 }
@@ -391,7 +405,7 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
     {
         for(int i = 0; i < num_fields; i++)
         {
-            printf("Votre identifiant est " COLOR_CYAN  "%s\n" COLOR_RESET, row[i] ? row[i] : "null"); // affichage en couleur cyan :-)
+            printf("\tVotre identifiant est " COLOR_CYAN "%s\n" COLOR_RESET, row[i] ? row[i] : "null"); // affichage en couleur cyan :-)
         }
     }
 }
@@ -473,8 +487,9 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
         strcpy(user.statut, "Secretariat");
         printf("Utilisateur de type : %s", user.statut);
         break;
-	default: printf("Erreur dans le choix de type de statut");
-		break;
+    default:
+        printf("Erreur dans le choix de type de statut");
+        break;
     }
     return  user;
 }
@@ -502,7 +517,7 @@ void add_user_database(MYSQL *con)
         ajouter_classe(con, utilisateur);
     }
     effacer_console();
-    printf(COLOR_MAGENTA " \t%s %s a bien été ajouté à la base de données !\n" COLOR_RESET, utilisateur.prenom, utilisateur.nom);
+    printf(COLOR_MAGENTA " \t\n%s %s a bien été ajouté à la base de données !\n\n" COLOR_RESET, utilisateur.prenom, utilisateur.nom);
 }
 
 
@@ -548,7 +563,7 @@ int supprimer_users(MYSQL *con)  // OK
 
 int main()
 {
-	/*  == Initialisation Database ==*/
+    /*  == Initialisation Database ==*/
     MYSQL *con = mysql_init(NULL);
     if (con == NULL)
     {
@@ -569,7 +584,7 @@ int main()
         switch(main_menu)
         {
         case 1:
-			effacer_console();
+            effacer_console();
             connexion_utilisateur(con);
             break;
 
