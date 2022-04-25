@@ -9,7 +9,9 @@
 #define COLOR_RESET   "\x1b[0m"
 #define COLOR_MAGENTA "\x1b[35m"
 #define COLOR_WHITE   "\x1B[97m"
-#define BG_CYAN 	  "\u001b[46;1m"
+
+#define TIME 3
+
 
 struct Utilisateur
 {
@@ -51,7 +53,8 @@ int menu_eleve()
 {
     int i;
     printf("== Eleve ==\n");
-    printf("1.  \n");
+	printf("This is not the menu you're looking for\n\n");
+
     printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
@@ -64,6 +67,7 @@ int menu_secretariat()
     printf("== Secretariat ==\n");
     printf("1. Ajouter utilisateur\n");
     printf("2. Afficher les classes\n");
+    printf("3. Afficher le nombre d'élèves\n");
     printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
@@ -74,7 +78,7 @@ int menu_enseignant()
 {
     int i;
     printf("== Enseignant ==\n");
-    printf("1. Choix 1 - enseignant\n");
+    printf("This is not the menu you're looking for\n");
 
     printf("0. Déconnexion\n");
     printf("Choix : ");
@@ -170,9 +174,12 @@ void afficher_classe(MYSQL *con)
     char request [500];
     printf("Quelle classe voulez-vous voir ?\n");
     int menu_aff_classe = menu_classe();
-    sprintf(request, "SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
-			SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs uti   INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
-			INNER JOIN Classe cla ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
+    sprintf(request,
+				"SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
+				SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs AS uti  \
+				INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
+				INNER JOIN Classe AS cla \
+				ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
 
     if (mysql_query(con, request))
     {
@@ -259,8 +266,13 @@ void menus_connexion(char * statut, MYSQL *con) //affiche les menus en fonction 
             case 2:
                 afficher_classe(con);
                 break;
+			case 3:
+				afficher_nb_eleve(con);
+				break;
             case 0:
-                printf("Quitter\n");
+                printf("Vous avez bien été déconnecté.e\n");
+                sleep(TIME);
+                effacer_console();
                 break;
             default :
                 printf("Erreur !\n");
@@ -284,6 +296,8 @@ void menus_connexion(char * statut, MYSQL *con) //affiche les menus en fonction 
                 break;
             case 0:
                 printf("Vous avez bien été déconnecté.e\n");
+                sleep(TIME);
+                effacer_console();
                 break;
             default:
                 printf("Erreur !\n");
@@ -307,6 +321,8 @@ void menus_connexion(char * statut, MYSQL *con) //affiche les menus en fonction 
                 break;
             case 0:
                 printf("Vous avez bien été déconnecté.e\n");
+                sleep(TIME);
+                effacer_console();
                 break;
             default:
                 printf("Erreur !");
