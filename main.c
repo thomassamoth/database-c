@@ -53,8 +53,7 @@ int menu_eleve()
 {
     int i;
     printf("== Eleve ==\n");
-	printf("This is not the menu you're looking for\n\n");
-
+	printf("1. Modifier votre mot de passe\n");
     printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
@@ -79,7 +78,7 @@ int menu_enseignant()
     int i;
     printf("== Enseignant ==\n");
     printf("This is not the menu you're looking for\n");
-
+	printf("1. Modifier votre mot de passe\n");
     printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
@@ -169,6 +168,35 @@ char * get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de
     free(statut);
 }
 
+char * get_password(MYSQL *con, struct Utilisateur user) //on récupère le mot de passe de l'utilisateur
+{
+    char request [200];
+    char *password = malloc(30);
+    sprintf(request, "SELECT user_password FROM Utilisateurs WHERE user_pseudo ='%s';", user.pseudo);
+    if(mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return 1;
+    }
+
+    MYSQL_RES *result = mysql_use_result(con);
+    if (result == NULL)
+    {
+        return(1);
+    }
+    int num_fields = mysql_num_fields(result);
+    MYSQL_ROW row;
+    while ((row = mysql_fetch_row(result)))
+    {
+        for(int i = 0; i < num_fields; i++)
+        {
+            strcpy(password, row[i]);
+        }
+    }
+    return password;
+    free(password);
+}
+
 void afficher_classe(MYSQL *con)
 {
     char request [500];
@@ -246,7 +274,7 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans 
 }
 
 
-void menus_connexion(char * statut, MYSQL *con) //affiche les menus en fonction du type d'utilisateurs
+void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user) //affiche les menus en fonction du type d'utilisateurs
 {
     int menu_sec, menu_el, menu_ens;
 
@@ -292,7 +320,7 @@ void menus_connexion(char * statut, MYSQL *con) //affiche les menus en fonction 
             switch(menu_el)
             {
             case 1:
-                printf("1. Choix n°1\n");
+                modifier_password(con, user);
                 break;
             case 0:
                 printf("Déconnexion réussie\n");
@@ -382,7 +410,7 @@ void connexion_utilisateur(MYSQL *con)
         sleep(TIME-1.5);
         effacer_console();
         char * statut = get_status(con, user); // on récupère le statut de l'utilisateur
-        menus_connexion(statut, con);
+        menus_connexion(statut, con, user);
     }
     mysql_free_result(result);
 }
@@ -540,21 +568,33 @@ void add_user_database(MYSQL *con)
 }
 
 
-/*void modifier_password(MYSQL *con)
+void modifier_password(MYSQL *con, struct Utilisateur user)
 {
     char request[500];
-    char new_password[30];
+    char nouveau_pwd[30];
+    char * previous_password = get_password(con, user); // on récupère le mot de passe dans la bdd
+    char ancien_pwd [30];
+
+    /* Confirmation ancien mot de passe */
+    while(strcmp(previous_password, ancien_pwd) != 0)
+	{
+		printf("Entrer votre ancien mot de passe : ");
+		scanf("%s", ancien_pwd);
+	}
+	printf("\n");
+
+	/* -- Nouveau mot de passe -- */
     printf("Entrer votre nouveau mot de passe : ");
-    scanf("%s", new_password);
-    sprintf(request, "UPDATE Utilisateurs SET user_password = '%s' WHERE user_pseudo = 'bruce'", new_password);
+    scanf("%s", nouveau_pwd);
+    sprintf(request, "UPDATE Utilisateurs SET user_password = '%s' WHERE user_pseudo = '%s'", nouveau_pwd, user.pseudo);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
         return;
     }
-    printf("Le mot de passe a été mis à jour avec succès !");
+    printf(COLOR_CYAN "Le mot de passe a été mis à jour avec succès !\n" COLOR_RESET);
 }
-*/
+
 
 
 int supprimer_users(MYSQL *con)  // OK
