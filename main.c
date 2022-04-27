@@ -10,7 +10,7 @@
 #define COLOR_MAGENTA "\x1b[35m"
 #define COLOR_WHITE   "\x1B[97m"
 
-#define TIME 3
+#define TIME 2
 
 
 struct Utilisateur
@@ -270,7 +270,7 @@ void menus_connexion(char * statut, MYSQL *con) //affiche les menus en fonction 
 				afficher_nb_eleve(con);
 				break;
             case 0:
-                printf("Vous avez bien été déconnecté.e\n");
+                printf("Déconnexion réussie\n");
                 sleep(TIME);
                 effacer_console();
                 break;
@@ -295,7 +295,7 @@ void menus_connexion(char * statut, MYSQL *con) //affiche les menus en fonction 
                 printf("1. Choix n°1\n");
                 break;
             case 0:
-                printf("Vous avez bien été déconnecté.e\n");
+                printf("Déconnexion réussie\n");
                 sleep(TIME);
                 effacer_console();
                 break;
@@ -316,11 +316,8 @@ void menus_connexion(char * statut, MYSQL *con) //affiche les menus en fonction 
             menu_ens = menu_enseignant();
             switch(menu_ens)
             {
-            case 1:
-                printf("1. Choix n°1\n");
-                break;
             case 0:
-                printf("Vous avez bien été déconnecté.e\n");
+                printf("Déconnexion réussie\n");
                 sleep(TIME);
                 effacer_console();
                 break;
@@ -340,7 +337,7 @@ void connexion_utilisateur(MYSQL *con)
     struct Utilisateur user;
     char request [500];
     char mot_de_passe [60];
-    int correspondance; //, menu_sec, menu_el, menu_ens;
+    int correspondance;
 
     printf("== Connexion == \n");
     printf("\tEntrer votre pseudo : ");
@@ -382,27 +379,18 @@ void connexion_utilisateur(MYSQL *con)
     else
     {
         printf("Connexion établie\n");
+        sleep(TIME-1.5);
+        effacer_console();
         char * statut = get_status(con, user); // on récupère le statut de l'utilisateur
         menus_connexion(statut, con);
     }
     mysql_free_result(result);
 }
 
-
-void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
+void afficher_pseudo(MYSQL *con, struct Utilisateur user)
 {
-    char request [500];
-    char aff_pseudo[100];
-
-    /* -- Ajout pseudo à la bdd -- */
-    sprintf(request, "UPDATE Utilisateurs SET user_pseudo = concat(lower(user_prenom),'.',lower(user_nom)) WHERE user_nom = '%s' AND user_prenom ='%s';", user.nom, user.prenom);
-    if (mysql_query(con, request))
-    {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return;
-    }
-
-    /* -- Affichage du pseudo -- */
+	char aff_pseudo[100];
+	/* -- Affichage du pseudo -- */
     sprintf(aff_pseudo, "SELECT user_pseudo FROM Utilisateurs WHERE user_prenom = '%s' AND user_nom = '%s' ",user.prenom, user.nom);
     if(mysql_query(con, aff_pseudo))
     {
@@ -425,6 +413,20 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
         }
     }
 }
+
+void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
+{
+    char request [500];
+
+    /* -- Ajout pseudo à la bdd -- */
+    sprintf(request, "UPDATE Utilisateurs SET user_pseudo = concat(lower(user_prenom),'.',lower(user_nom)) WHERE user_nom = '%s' AND user_prenom ='%s';", user.nom, user.prenom);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return;
+    }
+}
+
 
 
 void verif_enseignant(struct Utilisateur user) // non fonctionnelle
@@ -533,7 +535,8 @@ void add_user_database(MYSQL *con)
         ajouter_classe(con, utilisateur);
     }
     effacer_console();
-    printf(COLOR_MAGENTA " \t\n%s %s a bien été ajouté à la base de données !\n\n" COLOR_RESET, utilisateur.prenom, utilisateur.nom);
+    afficher_pseudo(con, utilisateur);
+    printf(COLOR_MAGENTA " \t\n%s %s a bien été ajouté.e à la base de données !\n\n" COLOR_RESET, utilisateur.prenom, utilisateur.nom);
 }
 
 
@@ -609,6 +612,8 @@ int main()
             break;
         default:
             printf("Erreur lors de votre choix ! Veuillez retenter.\n");
+            sleep(TIME);
+            effacer_console();
         }
     }
     while(main_menu != 0);
