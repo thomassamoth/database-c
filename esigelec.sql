@@ -89,6 +89,6 @@ VALUES
     (10, 'Espagnol'), 
     (11, 'Allemand'), 
     (12, 'Francais'), 
-    (13, 'Chinois'), 
-    
+    (13, 'Chinois'); 
+
 	
