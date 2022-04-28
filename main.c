@@ -10,7 +10,7 @@
 #define COLOR_MAGENTA "\x1b[35m"
 #define COLOR_WHITE   "\x1B[97m"
 
-#define TIME 2
+#define TIME 3
 
 
 struct Utilisateur
@@ -53,7 +53,7 @@ int menu_eleve()
 {
     int i;
     printf("== Eleve ==\n");
-	printf("1. Modifier votre mot de passe\n");
+    printf("1. Modifier votre mot de passe\n");
     printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
@@ -78,7 +78,7 @@ int menu_enseignant()
     int i;
     printf("== Enseignant ==\n");
     printf("This is not the menu you're looking for\n");
-	printf("1. Modifier votre mot de passe\n");
+    printf("1. Modifier votre mot de passe\n");
     printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
@@ -147,13 +147,13 @@ char * get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        return 1;
+        //return 1;
     }
 
     MYSQL_RES *result = mysql_use_result(con);
     if (result == NULL)
     {
-        return(1);
+        //return(1);
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
@@ -176,13 +176,13 @@ char * get_password(MYSQL *con, struct Utilisateur user) //on récupère le mot 
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        return 1;
+        //return 1;
     }
 
     MYSQL_RES *result = mysql_use_result(con);
     if (result == NULL)
     {
-        return(1);
+        //return(1);
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
@@ -203,7 +203,7 @@ void afficher_classe(MYSQL *con)
     printf("Quelle classe voulez-vous voir ?\n");
     int menu_aff_classe = menu_classe();
     sprintf(request,
-				"SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
+            "SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
 				SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs AS uti  \
 				INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
 				INNER JOIN Classe AS cla \
@@ -217,7 +217,7 @@ void afficher_classe(MYSQL *con)
     MYSQL_RES *result = mysql_use_result(con);
     if (result == NULL)
     {
-        return(1);
+        //return(1);
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
@@ -243,7 +243,7 @@ void afficher_nb_eleve(MYSQL *con)
     MYSQL_RES *result = mysql_use_result(con);
     if (result == NULL)
     {
-        return(1);
+        //return(1);
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
@@ -259,7 +259,7 @@ void afficher_nb_eleve(MYSQL *con)
 
 void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans la bdd
 {
-    char *request[100];
+    char request[100];
     printf("En quelle classe êtes-vous ?\n");
     int classe = menu_classe(); // on affiche le menu des classes
     int id = get_id(con, user); //on récupère l'id
@@ -269,8 +269,165 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans 
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        return 1;
+        //return 1;
     }
+}
+struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
+{
+    char password [30] = "0"; // on initialise un password pour rentrer dans la boucle while
+    char confirm_enseignant [10] = "code_prof";
+    char confirm_secretariat [10] = "code_sec";
+    struct Utilisateur user;
+
+    printf(" == CREATION UTILISATEUR ==\n");
+    printf ("\tEcrivez le prenom: ");
+    scanf("%s", user.prenom);
+    printf("\tEcrivez le nom: ");
+    scanf("%s", user.nom);
+    printf("\tEntrer un mot de passe : ");
+    scanf("%s", user.password);
+
+    /* -- Confirmation mot de passe --*/
+    while(strcmp(user.password, password) != 0)
+    {
+        printf("\tConfirmer le mot de passe : ");
+        scanf("%s", password);
+    }
+    strcpy(user.password, password);
+
+    /* -- Choix des permissions --*/
+    int menu_user =  menu_type_user();
+    switch(menu_user)
+    {
+    case 1: // Eleves
+        strcpy(user.statut, "Eleve");
+        break;
+
+    case 2: // Enseignant
+        printf("Entrer le code de validation reçu : ");
+        char code[30] = "0";
+        /* Vérification code enseignant */
+        scanf("%s", code);
+        while(strcmp(code, confirm_enseignant) != 0)
+        {
+            printf("Entrer le code de validation reçu : ");
+            scanf("%s", code);
+        }
+        strcpy(user.statut, "Enseignant");
+        break;
+
+    case 3: // Secretariat
+        printf("Entrer le code de validation reçu : ");
+        char code2[30] = "0";
+        /* Vérification code secretariat */
+        scanf("%s", code2);
+        while(strcmp(code2, confirm_secretariat) != 0)
+        {
+            printf("Entrer le code de validation reçu : ");
+            scanf("%s", code2);
+        }
+        strcpy(user.statut, "Secretariat");
+        printf("Utilisateur de type : %s", user.statut);
+        break;
+    default:
+        printf("Erreur dans le choix de type de statut");
+        break;
+    }
+    return  user;
+}
+
+void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
+{
+    char request [500];
+
+    /* -- Ajout pseudo à la bdd -- */
+    sprintf(request, "UPDATE Utilisateurs SET user_pseudo = concat(lower(user_prenom),'.',lower(user_nom)) WHERE user_nom = '%s' AND user_prenom ='%s';", user.nom, user.prenom);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return;
+    }
+}
+
+
+void afficher_pseudo(MYSQL *con, struct Utilisateur user)
+{
+    char aff_pseudo[500];
+    /* -- Affichage du pseudo -- */
+    sprintf(aff_pseudo, "SELECT user_pseudo FROM Utilisateurs WHERE user_prenom = '%s' AND user_nom = '%s' ",user.prenom, user.nom);
+    if(mysql_query(con, aff_pseudo))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return;
+    }
+    MYSQL_RES *result = mysql_use_result(con);
+    if (result == NULL)
+    {
+        //return(1);
+    }
+    int num_fields = mysql_num_fields(result);
+    MYSQL_ROW row;
+
+    while ((row = mysql_fetch_row(result)))
+    {
+        for(int i = 0; i < num_fields; i++)
+        {
+            printf("\tVotre identifiant est " COLOR_CYAN "%s\n" COLOR_RESET, row[i] ? row[i] : "null"); // affichage en couleur cyan :-)
+        }
+    }
+}
+
+
+void add_user_database(MYSQL *con)
+{
+    char request [1000];
+    struct Utilisateur utilisateur;
+    utilisateur = ajouter_utilisateur(con);
+
+    /* -- Ajout à la bdd -- */
+    sprintf(request, "INSERT INTO Utilisateurs(user_nom, user_prenom, user_statut, user_password) VALUES ('%s', '%s', '%s', '%s');", utilisateur.nom, utilisateur.prenom, utilisateur.statut, utilisateur.password);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+    }
+    /* -- Creation pseudo -- */
+    modifier_pseudo(con, utilisateur);
+
+    if(strcmp(utilisateur.statut, "Eleve") == 0)
+    {
+        ajouter_classe(con, utilisateur);
+    }
+    effacer_console();
+    afficher_pseudo(con, utilisateur);
+    printf(COLOR_MAGENTA " \t\n%s %s a bien été ajouté.e à la base de données !\n\n" COLOR_RESET, utilisateur.prenom, utilisateur.nom);
+}
+
+
+void modifier_password(MYSQL *con, struct Utilisateur user)
+{
+    char request[500];
+    char nouveau_pwd[30];
+    char * previous_password = get_password(con, user); // on récupère le mot de passe dans la bdd
+    char ancien_pwd [30];
+
+    /* Confirmation ancien mot de passe */
+    while(strcmp(previous_password, ancien_pwd) != 0)
+    {
+        printf("Entrer votre ancien mot de passe : ");
+        scanf("%s", ancien_pwd);
+    }
+    printf("\n");
+
+    /* -- Nouveau mot de passe -- */
+    printf("Entrer votre nouveau mot de passe : ");
+    scanf("%s", nouveau_pwd);
+    sprintf(request, "UPDATE Utilisateurs SET user_password = '%s' WHERE user_pseudo = '%s'", nouveau_pwd, user.pseudo);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return;
+    }
+    printf(COLOR_CYAN "Le mot de passe a été mis à jour avec succès !\n" COLOR_RESET);
 }
 
 
@@ -288,15 +445,15 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user) //affic
             switch(menu_sec)
             {
             case 1:
-				effacer_console();
+                //effacer_console();
                 add_user_database(con); //ajout d'un utilisateur à la bdd
                 break;
             case 2:
                 afficher_classe(con);
                 break;
-			case 3:
-				afficher_nb_eleve(con);
-				break;
+            case 3:
+                afficher_nb_eleve(con);
+                break;
             case 0:
                 printf("Déconnexion réussie\n");
                 sleep(TIME);
@@ -379,13 +536,13 @@ void connexion_utilisateur(MYSQL *con)
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        return 1;
+        //return 1;
     }
 
     MYSQL_RES *result = mysql_use_result(con);
     if (result == NULL)
     {
-        return(1);
+        //return(1);
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
@@ -415,47 +572,6 @@ void connexion_utilisateur(MYSQL *con)
     mysql_free_result(result);
 }
 
-void afficher_pseudo(MYSQL *con, struct Utilisateur user)
-{
-	char aff_pseudo[100];
-	/* -- Affichage du pseudo -- */
-    sprintf(aff_pseudo, "SELECT user_pseudo FROM Utilisateurs WHERE user_prenom = '%s' AND user_nom = '%s' ",user.prenom, user.nom);
-    if(mysql_query(con, aff_pseudo))
-    {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return;
-    }
-    MYSQL_RES *result = mysql_use_result(con);
-    if (result == NULL)
-    {
-        return(1);
-    }
-    int num_fields = mysql_num_fields(result);
-    MYSQL_ROW row;
-
-    while ((row = mysql_fetch_row(result)))
-    {
-        for(int i = 0; i < num_fields; i++)
-        {
-            printf("\tVotre identifiant est " COLOR_CYAN "%s\n" COLOR_RESET, row[i] ? row[i] : "null"); // affichage en couleur cyan :-)
-        }
-    }
-}
-
-void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
-{
-    char request [500];
-
-    /* -- Ajout pseudo à la bdd -- */
-    sprintf(request, "UPDATE Utilisateurs SET user_pseudo = concat(lower(user_prenom),'.',lower(user_nom)) WHERE user_nom = '%s' AND user_prenom ='%s';", user.nom, user.prenom);
-    if (mysql_query(con, request))
-    {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return;
-    }
-}
-
-
 
 void verif_enseignant(struct Utilisateur user) // non fonctionnelle
 {
@@ -474,127 +590,6 @@ void verif_enseignant(struct Utilisateur user) // non fonctionnelle
     printf("Utilisateur de type : %s", user.statut);
     printf("verif enseignant");
 }
-
-struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
-{
-    char password [30] = "0"; // on initialise un password pour rentrer dans la boucle while
-    char pseudo [30];
-    char confirm_enseignant [10] = "code_prof";
-    char confirm_secretariat [10] = "code_sec";
-    struct Utilisateur user;
-
-    printf(" == CREATION UTILISATEUR ==\n");
-    printf ("\tEcrivez le prenom: ");
-    scanf("%s", user.prenom);
-    printf("\tEcrivez le nom: ");
-    scanf("%s", user.nom);
-    printf("\tEntrer un mot de passe : ");
-    scanf("%s", user.password);
-
-    /* -- Confirmation mot de passe --*/
-    while(strcmp(user.password, password) != 0)
-    {
-        printf("\tConfirmer le mot de passe : ");
-        scanf("%s", password);
-    }
-    strcpy(user.password, password);
-
-    /* -- Choix des permissions --*/
-    int menu_user =  menu_type_user();
-    switch(menu_user)
-    {
-    case 1: // Eleves
-        strcpy(user.statut, "Eleve");
-        break;
-
-    case 2: // Enseignant
-        printf("Entrer le code de validation reçu : ");
-        char code[30] = "0";
-        /* Vérification code enseignant */
-        scanf("%s", code);
-        while(strcmp(code, confirm_enseignant) != 0)
-        {
-            printf("Entrer le code de validation reçu : ");
-            scanf("%s", code);
-        }
-        strcpy(user.statut, "Enseignant");
-        break;
-
-    case 3: // Secretariat
-        printf("Entrer le code de validation reçu : ");
-        char code2[30] = "0";
-        /* Vérification code secretariat */
-        scanf("%s", code2);
-        while(strcmp(code2, confirm_secretariat) != 0)
-        {
-            printf("Entrer le code de validation reçu : ");
-            scanf("%s", code2);
-        }
-        strcpy(user.statut, "Secretariat");
-        printf("Utilisateur de type : %s", user.statut);
-        break;
-    default:
-        printf("Erreur dans le choix de type de statut");
-        break;
-    }
-    return  user;
-}
-
-
-void add_user_database(MYSQL *con)
-{
-    char request [1000];
-    int id;
-    struct Utilisateur utilisateur;
-    utilisateur = ajouter_utilisateur(con);
-
-    /* -- Ajout à la bdd -- */
-    sprintf(request, "INSERT INTO Utilisateurs(user_nom, user_prenom, user_statut, user_password) VALUES ('%s', '%s', '%s', '%s');", utilisateur.nom, utilisateur.prenom, utilisateur.statut, utilisateur.password);
-    if (mysql_query(con, request))
-    {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return;
-    }
-    /* -- Creation pseudo -- */
-    modifier_pseudo(con, utilisateur);
-
-    if(strcmp(utilisateur.statut, "Eleve") == 0)
-    {
-        ajouter_classe(con, utilisateur);
-    }
-    effacer_console();
-    afficher_pseudo(con, utilisateur);
-    printf(COLOR_MAGENTA " \t\n%s %s a bien été ajouté.e à la base de données !\n\n" COLOR_RESET, utilisateur.prenom, utilisateur.nom);
-}
-
-
-void modifier_password(MYSQL *con, struct Utilisateur user)
-{
-    char request[500];
-    char nouveau_pwd[30];
-    char * previous_password = get_password(con, user); // on récupère le mot de passe dans la bdd
-    char ancien_pwd [30];
-
-    /* Confirmation ancien mot de passe */
-    while(strcmp(previous_password, ancien_pwd) != 0)
-	{
-		printf("Entrer votre ancien mot de passe : ");
-		scanf("%s", ancien_pwd);
-	}
-	printf("\n");
-
-	/* -- Nouveau mot de passe -- */
-    printf("Entrer votre nouveau mot de passe : ");
-    scanf("%s", nouveau_pwd);
-    sprintf(request, "UPDATE Utilisateurs SET user_password = '%s' WHERE user_pseudo = '%s'", nouveau_pwd, user.pseudo);
-    if (mysql_query(con, request))
-    {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return;
-    }
-    printf(COLOR_CYAN "Le mot de passe a été mis à jour avec succès !\n" COLOR_RESET);
-}
-
 
 
 int supprimer_users(MYSQL *con)  // OK
