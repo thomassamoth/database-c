@@ -10,7 +10,7 @@
 #define COLOR_MAGENTA "\x1b[35m"
 #define COLOR_WHITE   "\x1B[97m"
 
-#define TIME 3
+#define TIME 2
 
 
 struct Utilisateur
@@ -147,7 +147,6 @@ char * get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        //return 1;
     }
 
     MYSQL_RES *result = mysql_use_result(con);
@@ -272,6 +271,37 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans 
         //return 1;
     }
 }
+
+void verif_enseignant() // non fonctionnelle
+{
+    printf("Entrer le code de validation reçu : ");
+    char code[30] = "0";
+    char confirm_enseignant [10] = "code_prof";
+    scanf("%s", code);
+    /* Vérification code enseignant */
+    while(strcmp(code, confirm_enseignant) != 0)
+    {
+        printf("Entrer le code de validation reçu : ");
+        scanf("%s", code);
+        strcpy(code, confirm_enseignant);
+    }
+}
+
+void verif_secretariat() // non fonctionnelle
+{
+    printf("Entrer le code de validation reçu : ");
+    char code[30] = "0";
+    char confirm_secretariat [10] = "code_sec";
+    scanf("%s", code);
+    /* Vérification code secretariat */
+    while(strcmp(code, confirm_secretariat) != 0)
+    {
+        printf("Entrer le code de validation reçu : ");
+        scanf("%s", code);
+        strcpy(code, confirm_secretariat);
+    }
+}
+
 struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
 {
     char password [30] = "0"; // on initialise un password pour rentrer dans la boucle while
@@ -304,31 +334,16 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
         break;
 
     case 2: // Enseignant
-        printf("Entrer le code de validation reçu : ");
-        char code[30] = "0";
-        /* Vérification code enseignant */
-        scanf("%s", code);
-        while(strcmp(code, confirm_enseignant) != 0)
-        {
-            printf("Entrer le code de validation reçu : ");
-            scanf("%s", code);
-        }
-        strcpy(user.statut, "Enseignant");
+        verif_enseignant();
+		strcpy(user.statut, "Enseignant");
         break;
 
     case 3: // Secretariat
-        printf("Entrer le code de validation reçu : ");
-        char code2[30] = "0";
-        /* Vérification code secretariat */
-        scanf("%s", code2);
-        while(strcmp(code2, confirm_secretariat) != 0)
-        {
-            printf("Entrer le code de validation reçu : ");
-            scanf("%s", code2);
-        }
+		verif_secretariat();
         strcpy(user.statut, "Secretariat");
         printf("Utilisateur de type : %s", user.statut);
         break;
+
     default:
         printf("Erreur dans le choix de type de statut");
         break;
@@ -348,7 +363,6 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
         return;
     }
 }
-
 
 void afficher_pseudo(MYSQL *con, struct Utilisateur user)
 {
@@ -376,7 +390,6 @@ void afficher_pseudo(MYSQL *con, struct Utilisateur user)
         }
     }
 }
-
 
 void add_user_database(MYSQL *con)
 {
@@ -571,26 +584,6 @@ void connexion_utilisateur(MYSQL *con)
     }
     mysql_free_result(result);
 }
-
-
-void verif_enseignant(struct Utilisateur user) // non fonctionnelle
-{
-    printf("Entrer le code de validation reçu : ");
-    char code[30] = "0";
-    char confirm_enseignant [10] = "code_prof";
-    scanf("%s", code);
-    /* Vérification code enseignant */
-    while(strcmp(code, confirm_enseignant) != 0)
-    {
-        printf("Entrer le code de validation reçu : ");
-        scanf("%s", code);
-        strcpy(code, confirm_enseignant);
-    }
-    strcpy(user.statut, "Enseignant");
-    printf("Utilisateur de type : %s", user.statut);
-    printf("verif enseignant");
-}
-
 
 int supprimer_users(MYSQL *con)  // OK
 {
