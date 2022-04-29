@@ -272,7 +272,7 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans 
     }
 }
 
-void verif_enseignant() // non fonctionnelle
+void verif_enseignant()
 {
     printf("Entrer le code de validation reçu : ");
     char code[30] = "0";
@@ -287,7 +287,7 @@ void verif_enseignant() // non fonctionnelle
     }
 }
 
-void verif_secretariat() // non fonctionnelle
+void verif_secretariat()
 {
     printf("Entrer le code de validation reçu : ");
     char code[30] = "0";
@@ -305,8 +305,6 @@ void verif_secretariat() // non fonctionnelle
 struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
 {
     char password [30] = "0"; // on initialise un password pour rentrer dans la boucle while
-    char confirm_enseignant [10] = "code_prof";
-    char confirm_secretariat [10] = "code_sec";
     struct Utilisateur user;
 
     printf(" == CREATION UTILISATEUR ==\n");
@@ -341,7 +339,6 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
     case 3: // Secretariat
 		verif_secretariat();
         strcpy(user.statut, "Secretariat");
-        printf("Utilisateur de type : %s", user.statut);
         break;
 
     default:
