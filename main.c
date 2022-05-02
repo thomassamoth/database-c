@@ -259,7 +259,7 @@ void afficher_nb_eleve(MYSQL *con)
 void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans la bdd
 {
     char request[100];
-    printf("En quelle classe êtes-vous ?\n");
+    printf("En quelle classe l'eleve est?\n");
     int classe = menu_classe(); // on affiche le menu des classes
     int id = get_id(con, user); //on récupère l'id
 
@@ -286,6 +286,23 @@ void verif_enseignant()
         strcpy(code, confirm_enseignant);
     }
 }
+
+/*
+void assignation_classe ()
+{
+    int i=0;
+    char request [500];
+
+    printf ("Dans quelle matiere est le prof?");
+    printf ("1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'");
+    while (i==0)
+    {
+        fflush(stdin);
+        scanf ("%d", &i);
+    }
+    sprintf(request, "INSERT INTO Matiere(mat_prof_nom, mat_prof_prenom, %s, %s);", utilisateur.nom, Utilisateurprenom;
+}
+*/
 
 void verif_secretariat()
 {
@@ -615,7 +632,7 @@ int main()
         return(1);
     }
 
-    if (mysql_real_connect(con, "localhost", "esigelec", "esigelec", "Esigelec", 0, NULL, 0) == NULL) //
+    if (mysql_real_connect(con, "localhost", "esigelec", "esigelec", "Esigelec", 0, NULL, 0) == NULL)
     {
         return(1);
     }
