@@ -22,7 +22,8 @@ struct Utilisateur
     char statut[30]; // permissions
 };
 
-/* === FONCTIONS MENUS === */
+/* === FONCTIONS AFFICHAGE MENUS === */
+
 
 int menu_classe()
 {
@@ -51,6 +52,7 @@ int menu_principal()
 
 int menu_eleve()
 {
+	/* Menu affiché lorsque l'utilisateur connecté est de type 'Eleve' */
     int i;
     printf("== Eleve ==\n");
     printf("1. Modifier votre mot de passe\n");
@@ -62,6 +64,7 @@ int menu_eleve()
 
 int menu_secretariat()
 {
+	/* Menu affiché lorsque l'utilisateur connecté est de type 'Secrectariat' */
     int i;
     printf("== Secretariat ==\n");
     printf("1. Ajouter utilisateur\n");
@@ -75,6 +78,7 @@ int menu_secretariat()
 
 int menu_enseignant()
 {
+	/* Menu affiché lorsque l'utilisateur connecté est de type 'Enseignant' */
     int i;
     printf("== Enseignant ==\n");
     printf("This is not the menu you're looking for\n");
@@ -87,6 +91,7 @@ int menu_enseignant()
 
 int menu_type_user()
 {
+	/* Menu affiché lors de la création d'un utilisateur par le secretariat */
     int i;
     printf("Quel type d'utilisateur êtes-vous ?\n\n");
     printf("1 - Eleve\n");
@@ -109,9 +114,13 @@ void effacer_console()
 }
 
 
-int get_id(MYSQL *con, struct Utilisateur user)  //OK
+int get_id(MYSQL *con, struct Utilisateur user)
 {
-    /* Retourne l'id de l'utilisateur souhaité */
+    /* Paramètres :
+		connexion MYSQL, Utilisateur
+	  Retourne:
+		int : id de l'utilisateur souhaité, à partir de son prénom & nom */
+
     char request [200];
     int id;
     sprintf(request, "SELECT user_id FROM Utilisateurs WHERE user_prenom = '%s' AND user_nom = '%s';", user.prenom, user.nom);
@@ -132,15 +141,20 @@ int get_id(MYSQL *con, struct Utilisateur user)  //OK
     {
         for(int i = 0; i < num_fields; i++)
         {
-            id = atoi(row[i]); //conversion en entier
+            id = atoi(row[i]); 	//conversion en entier
         }
     }
     return id;
 }
 
 
-char * get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de l'utilisateur
+char * get_status(MYSQL *con, struct Utilisateur user)
 {
+	/* Paramètres :
+		connexion, Utilisateur */
+	/* Retourne:
+		char: statut de l'utilisateur entré, à partir de son pseudo */
+
     char request [200];
     char *statut = malloc(30);
     sprintf(request, "SELECT user_statut FROM Utilisateurs WHERE user_pseudo ='%s';", user.pseudo);
@@ -160,15 +174,20 @@ char * get_status(MYSQL *con, struct Utilisateur user) //récuperer le statut de
     {
         for(int i = 0; i < num_fields; i++)
         {
-            strcpy(statut, row[i]);
+            strcpy(statut, row[i]); 	//copie du statut dans la variable retournée
         }
     }
     return statut;
-    free(statut);
+    free(statut); 	//libération mémoire
 }
 
-char * get_password(MYSQL *con, struct Utilisateur user) //on récupère le mot de passe de l'utilisateur
+char * get_password(MYSQL *con, struct Utilisateur user)
 {
+	/* Paramètres :
+		connexion, Utilisateur
+	/* Retourne:
+		char : mot de passe de l'utilisateur, récupéré à partir de son pseudo */
+
     char request [200];
     char *password = malloc(30);
     sprintf(request, "SELECT user_password FROM Utilisateurs WHERE user_pseudo ='%s';", user.pseudo);
@@ -189,34 +208,56 @@ char * get_password(MYSQL *con, struct Utilisateur user) //on récupère le mot 
     {
         for(int i = 0; i < num_fields; i++)
         {
-            strcpy(password, row[i]);
+            strcpy(password, row[i]); //récupération password dans la bdd -> var finale
         }
     }
     return password;
     free(password);
 }
 
+void rechercher_eleve(MYSQL *con, struct Utilisateur user)
+{
+	/* Paramètres :
+		con, Utilisateur */
+	/* Retourne: None */
+
+    printf("Entrer le prénom de l'élève souhaité : ");
+    scanf("%s", user.prenom);
+    printf("Entrer le nom de l'élève souhaité : ");
+    scanf("%s", user.nom);
+
+    int id = get_id(con, user);
+    printf("%d", id);
+}
+
 void afficher_classe(MYSQL *con)
 {
+	/* Paramètres :
+		connnexion */
+	/* Retourne: None
+
+	Affiche les élèves de la classe demandée sour la forme :
+		"Liste des élèves de la classe {Classe} : "
+			{Liste} */
+
     char request [500];
     printf("Quelle classe voulez-vous voir ?\n");
     int menu_aff_classe = menu_classe();
     sprintf(request,
             "SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
-				SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs AS uti  \
-				INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
-				INNER JOIN Classe AS cla \
-				ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
+			SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs AS uti  \
+			INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
+			INNER JOIN Classe AS cla \
+			ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
 
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        return;
-    }
+	}
     MYSQL_RES *result = mysql_use_result(con);
     if (result == NULL)
     {
-        //return(1);
+        exit(1);
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
@@ -225,7 +266,7 @@ void afficher_classe(MYSQL *con)
     {
         for(int i = 0; i < num_fields; i++)
         {
-            printf(COLOR_MAGENTA "%s\n" COLOR_RESET, row[i] ? row[i] : "null");
+            printf(COLOR_MAGENTA "%s\n" COLOR_RESET, row[i] ? row[i] : "null"); // Affichage en magenta
         }
     }
     printf("\n\n");
@@ -234,7 +275,12 @@ void afficher_classe(MYSQL *con)
 
 void afficher_nb_eleve(MYSQL *con)
 {
-    /* Affiche le nombre d'élèves -- */
+    /* Paramètres :
+		connexion */
+    /* Retourne:  None
+
+	Affiche le nombre d'élèves présents dans la bdd */
+
     if(mysql_query(con, "SELECT COUNT(user_id) FROM Utilisateurs WHERE user_statut = 'Eleve'"))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -250,18 +296,26 @@ void afficher_nb_eleve(MYSQL *con)
     {
         for(int i = 0; i < num_fields; i++)
         {
-            printf("Nombre d'élèves : %d\n", atoi(row[i]));
+            printf("Nombre d'élèves : %d\n", atoi(row[i])); // conversion en entier
         }
     }
 }
 
 
-void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans la bdd
+void ajouter_classe(MYSQL *con, struct Utilisateur user)
 {
+	/* Paramètres :
+		con, Utilisateur */
+	/* Retourne:
+		Ajoute les correspondances entre les Utilisateurs et les classes à partir de leur id dans la table Personne_Classe
+			 - Si utilisateur est élève : ajout de sa classe
+			 - Si utilisateur est enseignant : ajout des classes dont il est responsable */
+
+
     char request[100];
-    printf("En quelle classe l'eleve est?\n");
-    int classe = menu_classe(); // on affiche le menu des classes
-    int id = get_id(con, user); //on récupère l'id
+    printf("En quelle classe êtes-vous ?\n");
+    int classe = menu_classe(); 	// Affichage du menu des classes
+    int id = get_id(con, user); 	// Récupération de l'id
 
     /* -- Requete -- */
     sprintf(request, "INSERT INTO Personne_Classe VALUES(%d, %d);", id, classe);
@@ -274,6 +328,11 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user) // ajouter classe dans 
 
 void verif_enseignant()
 {
+	// Paramètres : None
+	// Retourne : None
+
+	/* Vérifie si l'utilisateur entré est bien un enseignant */
+
     printf("Entrer le code de validation reçu : ");
     char code[30] = "0";
     char confirm_enseignant [10] = "code_prof";
@@ -287,25 +346,13 @@ void verif_enseignant()
     }
 }
 
-/*
-void assignation_classe ()
-{
-    int i=0;
-    char request [500];
-
-    printf ("Dans quelle matiere est le prof?");
-    printf ("1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'");
-    while (i==0)
-    {
-        fflush(stdin);
-        scanf ("%d", &i);
-    }
-    sprintf(request, "INSERT INTO Matiere(mat_prof_nom, mat_prof_prenom, %s, %s);", utilisateur.nom, Utilisateurprenom;
-}
-*/
-
 void verif_secretariat()
 {
+	// Paramètres : None
+	// Retourne : None
+
+	/* Vérifie si l'utilisateur entré est bien un secrétaire */
+
     printf("Entrer le code de validation reçu : ");
     char code[30] = "0";
     char confirm_secretariat [10] = "code_sec";
@@ -321,6 +368,9 @@ void verif_secretariat()
 
 struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
 {
+	// Paramètre : connexion
+	// Retourne : struct Utilisateur :
+
     char password [30] = "0"; // on initialise un password pour rentrer dans la boucle while
     struct Utilisateur user;
 
@@ -350,11 +400,11 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
 
     case 2: // Enseignant
         verif_enseignant();
-		strcpy(user.statut, "Enseignant");
+        strcpy(user.statut, "Enseignant");
         break;
 
     case 3: // Secretariat
-		verif_secretariat();
+        verif_secretariat();
         strcpy(user.statut, "Secretariat");
         break;
 
@@ -374,7 +424,7 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        return;
+        //return;
     }
 }
 
@@ -533,6 +583,13 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user) //affic
                 sleep(TIME);
                 effacer_console();
                 break;
+            case 1:
+                modifier_password(con, user);
+                break;
+            case 2:
+                printf("== Recherche élève ==\n");
+                //rechercher_eleve(con, user);
+                break;
             default:
                 printf("Erreur !");
             }
@@ -637,7 +694,7 @@ int main()
         return(1);
     }
 
-    /* == MAIN MENU == */
+    /* == MENU PRINCIPAL == */
     int main_menu;
     do
     {
