@@ -52,7 +52,7 @@ int menu_principal()
 
 int menu_eleve()
 {
-	/* Menu affiché lorsque l'utilisateur connecté est de type 'Eleve' */
+    /* Menu affiché lorsque l'utilisateur connecté est de type 'Eleve' */
     int i;
     printf("== Eleve ==\n");
     printf("1. Modifier votre mot de passe\n");
@@ -64,7 +64,7 @@ int menu_eleve()
 
 int menu_secretariat()
 {
-	/* Menu affiché lorsque l'utilisateur connecté est de type 'Secrectariat' */
+    /* Menu affiché lorsque l'utilisateur connecté est de type 'Secrectariat' */
     int i;
     printf("== Secretariat ==\n");
     printf("1. Ajouter utilisateur\n");
@@ -78,7 +78,7 @@ int menu_secretariat()
 
 int menu_enseignant()
 {
-	/* Menu affiché lorsque l'utilisateur connecté est de type 'Enseignant' */
+    /* Menu affiché lorsque l'utilisateur connecté est de type 'Enseignant' */
     int i;
     printf("== Enseignant ==\n");
     printf("This is not the menu you're looking for\n");
@@ -91,7 +91,7 @@ int menu_enseignant()
 
 int menu_type_user()
 {
-	/* Menu affiché lors de la création d'un utilisateur par le secretariat */
+    /* Menu affiché lors de la création d'un utilisateur par le secretariat */
     int i;
     printf("Quel type d'utilisateur êtes-vous ?\n\n");
     printf("1 - Eleve\n");
@@ -117,13 +117,16 @@ void effacer_console()
 int get_id(MYSQL *con, struct Utilisateur user)
 {
     /* Paramètres :
-		connexion MYSQL, Utilisateur
-	  Retourne:
-		int : id de l'utilisateur souhaité, à partir de son prénom & nom */
+    	connexion MYSQL, Utilisateur
+      Retourne:
+    	int : id de l'utilisateur souhaité, à partir de son prénom & nom */
 
     char request [200];
     int id;
-    sprintf(request, "SELECT user_id FROM Utilisateurs WHERE user_prenom = '%s' AND user_nom = '%s';", user.prenom, user.nom);
+    sprintf(request,
+            "SELECT user_id FROM Utilisateurs WHERE user_prenom = '%s' AND \
+			user_nom = '%s';", user.prenom, user.nom);
+
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -150,14 +153,17 @@ int get_id(MYSQL *con, struct Utilisateur user)
 
 char * get_status(MYSQL *con, struct Utilisateur user)
 {
-	/* Paramètres :
-		connexion, Utilisateur */
-	/* Retourne:
-		char: statut de l'utilisateur entré, à partir de son pseudo */
+    /* Paramètres :
+    	connexion, Utilisateur */
+    /* Retourne:
+    	char: statut de l'utilisateur entré, à partir de son pseudo */
 
     char request [200];
     char *statut = malloc(30);
-    sprintf(request, "SELECT user_statut FROM Utilisateurs WHERE user_pseudo ='%s';", user.pseudo);
+    sprintf(request,
+            "SELECT user_statut FROM Utilisateurs WHERE user_pseudo ='%s';",
+            user.pseudo);
+
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -174,7 +180,7 @@ char * get_status(MYSQL *con, struct Utilisateur user)
     {
         for(int i = 0; i < num_fields; i++)
         {
-            strcpy(statut, row[i]); 	//copie du statut dans la variable retournée
+            strcpy(statut, row[i]); //copie du statut dans la variable retournée
         }
     }
     return statut;
@@ -183,14 +189,17 @@ char * get_status(MYSQL *con, struct Utilisateur user)
 
 char * get_password(MYSQL *con, struct Utilisateur user)
 {
-	/* Paramètres :
-		connexion, Utilisateur
-	/* Retourne:
-		char : mot de passe de l'utilisateur, récupéré à partir de son pseudo */
+    /* Paramètres :
+    	connexion, Utilisateur */
+    /* Retourne:
+    	char : mot de passe de l'utilisateur, récupéré à partir de son pseudo */
 
     char request [200];
     char *password = malloc(30);
-    sprintf(request, "SELECT user_password FROM Utilisateurs WHERE user_pseudo ='%s';", user.pseudo);
+    sprintf(request,
+            "SELECT user_password FROM Utilisateurs WHERE user_pseudo ='%s';",
+            user.pseudo);
+
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -217,9 +226,9 @@ char * get_password(MYSQL *con, struct Utilisateur user)
 
 void rechercher_eleve(MYSQL *con, struct Utilisateur user)
 {
-	/* Paramètres :
-		con, Utilisateur */
-	/* Retourne: None */
+    /* Paramètres :
+    	con, Utilisateur */
+    /* Retourne: None */
 
     printf("Entrer le prénom de l'élève souhaité : ");
     scanf("%s", user.prenom);
@@ -232,13 +241,13 @@ void rechercher_eleve(MYSQL *con, struct Utilisateur user)
 
 void afficher_classe(MYSQL *con)
 {
-	/* Paramètres :
-		connnexion */
-	/* Retourne: None
+    /* Paramètres :
+    	connnexion */
+    /* Retourne: None
 
-	Affiche les élèves de la classe demandée sour la forme :
-		"Liste des élèves de la classe {Classe} : "
-			{Liste} */
+    Affiche les élèves de la classe demandée sour la forme :
+    	"Liste des élèves de la classe {Classe} : "
+    		{Liste} */
 
     char request [500];
     printf("Quelle classe voulez-vous voir ?\n");
@@ -253,7 +262,7 @@ void afficher_classe(MYSQL *con)
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-	}
+    }
     MYSQL_RES *result = mysql_use_result(con);
     if (result == NULL)
     {
@@ -276,10 +285,10 @@ void afficher_classe(MYSQL *con)
 void afficher_nb_eleve(MYSQL *con)
 {
     /* Paramètres :
-		connexion */
+    	connexion */
     /* Retourne:  None
 
-	Affiche le nombre d'élèves présents dans la bdd */
+    Affiche le nombre d'élèves présents dans la bdd */
 
     if(mysql_query(con, "SELECT COUNT(user_id) FROM Utilisateurs WHERE user_statut = 'Eleve'"))
     {
@@ -304,12 +313,12 @@ void afficher_nb_eleve(MYSQL *con)
 
 void ajouter_classe(MYSQL *con, struct Utilisateur user)
 {
-	/* Paramètres :
-		con, Utilisateur */
-	/* Retourne:
-		Ajoute les correspondances entre les Utilisateurs et les classes à partir de leur id dans la table Personne_Classe
-			 - Si utilisateur est élève : ajout de sa classe
-			 - Si utilisateur est enseignant : ajout des classes dont il est responsable */
+    /* Paramètres :
+    	con, Utilisateur */
+    /* Retourne:
+    	Ajoute les correspondances entre les Utilisateurs et les classes à partir de leur id dans la table Personne_Classe
+    		 - Si utilisateur est élève : ajout de sa classe
+    		 - Si utilisateur est enseignant : ajout des classes dont il est responsable */
 
 
     char request[100];
@@ -328,10 +337,10 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user)
 
 void verif_enseignant()
 {
-	// Paramètres : None
-	// Retourne : None
+    // Paramètres : None
+    // Retourne : None
 
-	/* Vérifie si l'utilisateur entré est bien un enseignant */
+    /* Vérifie si l'utilisateur entré est bien un enseignant */
 
     printf("Entrer le code de validation reçu : ");
     char code[30] = "0";
@@ -348,10 +357,10 @@ void verif_enseignant()
 
 void verif_secretariat()
 {
-	// Paramètres : None
-	// Retourne : None
+    // Paramètres : None
+    // Retourne : None
 
-	/* Vérifie si l'utilisateur entré est bien un secrétaire */
+    /* Vérifie si l'utilisateur entré est bien un secrétaire */
 
     printf("Entrer le code de validation reçu : ");
     char code[30] = "0";
@@ -368,10 +377,11 @@ void verif_secretariat()
 
 struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
 {
-	// Paramètre : connexion
-	// Retourne : struct Utilisateur :
+    // Paramètre : connexion
+    // Retourne : struct Utilisateur : Utilisateur
 
-    char password [30] = "0"; // on initialise un password pour rentrer dans la boucle while
+
+    char password [30] = "0"; // on initialise un mot de passe pour rentrer dans la boucle while
     struct Utilisateur user;
 
     printf(" == CREATION UTILISATEUR ==\n");
@@ -417,10 +427,17 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con) //OK
 
 void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
 {
+    /* Paramètres :
+    	connexion,  Utilisateur */
+    /* Retourne : None */
+
+    // Modifie le pseudo généré par défault ("") en SQL par celui sous la forme {prenom.nom}
+
     char request [500];
 
     /* -- Ajout pseudo à la bdd -- */
-    sprintf(request, "UPDATE Utilisateurs SET user_pseudo = concat(lower(user_prenom),'.',lower(user_nom)) WHERE user_nom = '%s' AND user_prenom ='%s';", user.nom, user.prenom);
+    sprintf(request, "UPDATE Utilisateurs SET user_pseudo = concat(lower(user_prenom),'.', \
+    lower(user_nom)) WHERE user_nom = '%s' AND user_prenom ='%s';", user.nom, user.prenom);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -430,10 +447,13 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
 
 void afficher_pseudo(MYSQL *con, struct Utilisateur user)
 {
-    char aff_pseudo[500];
+    // Paramètres : con, Utilisateur
+
+    char request[500];
     /* -- Affichage du pseudo -- */
-    sprintf(aff_pseudo, "SELECT user_pseudo FROM Utilisateurs WHERE user_prenom = '%s' AND user_nom = '%s' ",user.prenom, user.nom);
-    if(mysql_query(con, aff_pseudo))
+    sprintf(request, "SELECT user_pseudo FROM Utilisateurs WHERE user_prenom = '%s' AND \
+    user_nom = '%s' ",user.prenom, user.nom);
+    if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
         return;
@@ -450,19 +470,23 @@ void afficher_pseudo(MYSQL *con, struct Utilisateur user)
     {
         for(int i = 0; i < num_fields; i++)
         {
-            printf("\tVotre identifiant est " COLOR_CYAN "%s\n" COLOR_RESET, row[i] ? row[i] : "null"); // affichage en couleur cyan :-)
+            printf("\tVotre identifiant est " COLOR_CYAN "%s\n" COLOR_RESET,
+					row[i] ? row[i] : "null"); // affichage en couleur cyan :-)
         }
     }
 }
 
 void add_user_database(MYSQL *con)
 {
+    /* Ajoute un utilisateur dans la base de donnée  après avoir crée son profil */
     char request [1000];
     struct Utilisateur utilisateur;
-    utilisateur = ajouter_utilisateur(con);
+    utilisateur = ajouter_utilisateur(con); // création de l'utilisateur
 
     /* -- Ajout à la bdd -- */
-    sprintf(request, "INSERT INTO Utilisateurs(user_nom, user_prenom, user_statut, user_password) VALUES ('%s', '%s', '%s', '%s');", utilisateur.nom, utilisateur.prenom, utilisateur.statut, utilisateur.password);
+    sprintf(request, "INSERT INTO Utilisateurs(user_nom, user_prenom, user_statut, user_password) \
+			VALUES ('%s', '%s', '%s', '%s');",
+            utilisateur.nom, utilisateur.prenom, utilisateur.statut, utilisateur.password);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -470,13 +494,24 @@ void add_user_database(MYSQL *con)
     /* -- Creation pseudo -- */
     modifier_pseudo(con, utilisateur);
 
+    /* Fonctions spécifiques pour chaque type d'utilisateurs */
     if(strcmp(utilisateur.statut, "Eleve") == 0)
     {
         ajouter_classe(con, utilisateur);
     }
+
+    /*else if(strcmp(utilisateur.statut, "Enseignant") == 0))
+    {
+    	continue;
+    }
+    else if(strcmp(utilisateur.statut, "Secretariat") == 0))
+    {
+    	continue;
+    } */
     effacer_console();
     afficher_pseudo(con, utilisateur);
-    printf(COLOR_MAGENTA " \t\n%s %s a bien été ajouté.e à la base de données !\n\n" COLOR_RESET, utilisateur.prenom, utilisateur.nom);
+    printf(COLOR_MAGENTA "\t\n%s %s a bien été ajouté.e à la base de données !\n\n" COLOR_RESET,
+           utilisateur.prenom, utilisateur.nom);
 }
 
 
@@ -498,7 +533,9 @@ void modifier_password(MYSQL *con, struct Utilisateur user)
     /* -- Nouveau mot de passe -- */
     printf("Entrer votre nouveau mot de passe : ");
     scanf("%s", nouveau_pwd);
-    sprintf(request, "UPDATE Utilisateurs SET user_password = '%s' WHERE user_pseudo = '%s'", nouveau_pwd, user.pseudo);
+    sprintf(request, "UPDATE Utilisateurs SET user_password = '%s' WHERE user_pseudo = '%s'",
+            nouveau_pwd, user.pseudo);
+
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -507,8 +544,8 @@ void modifier_password(MYSQL *con, struct Utilisateur user)
     printf(COLOR_CYAN "Le mot de passe a été mis à jour avec succès !\n" COLOR_RESET);
 }
 
-
-void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user) //affiche les menus en fonction du type d'utilisateurs
+//affiche les menus en fonction du type d'utilisateurs.
+void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
 {
     int menu_sec, menu_el, menu_ens;
 
@@ -601,6 +638,10 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user) //affic
     free(statut); // on libère la mémoire de statut
 }
 
+// Compte le nombre de personnes retournées correspondant au couple pseudo/password rentré
+// Si retourne 1 : identifiants corrects
+// Si retourne 0 : mauvais identifiants
+// Sinon erreur
 void connexion_utilisateur(MYSQL *con)
 {
     struct Utilisateur user;
@@ -608,14 +649,17 @@ void connexion_utilisateur(MYSQL *con)
     char mot_de_passe [60];
     int correspondance;
 
+	/* -- Affichage menu -- */
     printf("== Connexion == \n");
     printf("\tEntrer votre pseudo : ");
     scanf("%s", user.pseudo);
     printf("\tEntrer votre mot de passe : ");
     scanf("%s", mot_de_passe);
-    // on compte le nombre de personnes retournées :
-    //si 1: qqn est associé, sinon personne n'est associé et il y a une erreur
-    sprintf(request, "SELECT count(user_id) FROM Utilisateurs WHERE  user_pseudo  =  BINARY '%s' AND user_password =  BINARY '%s';", user.pseudo, mot_de_passe);
+
+   /* Requete */
+    sprintf(request,
+			"SELECT count(user_id) FROM Utilisateurs WHERE user_pseudo = BINARY '%s' AND  \
+			user_password = BINARY '%s';", user.pseudo, mot_de_passe);
 
     if(mysql_query(con, request))
     {
@@ -641,7 +685,7 @@ void connexion_utilisateur(MYSQL *con)
     if(correspondance == 0)
     {
         printf(COLOR_RED "Informations de connexion erronées. Veuillez réessayer !\n" COLOR_RESET);
-        sleep(1);
+        sleep(TIME - 1);
         effacer_console();
         connexion_utilisateur(con);
     }
@@ -656,7 +700,7 @@ void connexion_utilisateur(MYSQL *con)
     mysql_free_result(result);
 }
 
-int supprimer_users(MYSQL *con)  // OK
+int supprimer_users(MYSQL *con)
 {
     int indice;
     char request [50];
@@ -668,7 +712,8 @@ int supprimer_users(MYSQL *con)  // OK
         fprintf(stderr, "%s\n", mysql_error(con));
         return(1);
     }
-    // Reinitialisation des user_id au nombre voulu
+
+    /* Reinitialisation des user_id au nombre voulu */
     sprintf(request,"ALTER TABLE Utilisateurs AUTO_INCREMENT = %d", indice);
     if(mysql_query(con, request))
     {
@@ -683,13 +728,13 @@ int main()
 {
     /*  == Initialisation Database ==*/
     MYSQL *con = mysql_init(NULL);
-    if (con == NULL)
+    if(con == NULL)
     {
         fprintf(stderr, "mysql_init() failed\n");
         return(1);
     }
 
-    if (mysql_real_connect(con, "localhost", "esigelec", "esigelec", "Esigelec", 0, NULL, 0) == NULL)
+    if(mysql_real_connect(con, "localhost", "esigelec", "esigelec", "Esigelec", 0, NULL, 0) == NULL)
     {
         return(1);
     }
