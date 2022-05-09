@@ -50,6 +50,14 @@ CREATE TABLE Personne_Classe (
 )
 ENGINE = INNODB;
 
+CREATE TABLE Personne_Matiere ( 
+    id_personne INT UNSIGNED NOT NULL,
+    matiere_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY(id_personne),
+    CONSTRAINT fk_matiere_id FOREIGN KEY (matiere_id) REFERENCES Matiere(mat_id) ON DELETE CASCADE
+    -- CONSTRAINT fk_user_id FOREIGN KEY (id_personne) REFERENCES Utilisateurs(user_id) ON DELETE CASCADE 
+)
+ENGINE = INNODB;
 
 CREATE TABLE Bulletin (
     bull_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
