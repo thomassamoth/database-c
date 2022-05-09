@@ -26,6 +26,7 @@ CREATE TABLE Utilisateurs (
     user_statut VARCHAR(30) NOT NULL,
     user_pseudo VARCHAR(30) NOT NULL DEFAULT '' UNIQUE, 
     user_password VARCHAR(30) NOT NULL,
+    user_promo INT DEFAULT NULL,
     
     PRIMARY KEY(user_id)
 )
@@ -73,9 +74,9 @@ ENGINE = INNODB;
 
 INSERT INTO Utilisateurs
 VALUES 
-    (1, 'Admin', 'Admin', 'Secretariat', 'admin', 'admin'),
-    (2, 'Beyet', 'Thomas', 'Eleve', 'thomas.beyet', 'thomas'),
-    (3, 'Prof', 'Prof', 'Enseignant', 'prof', 'prof');
+    (1, 'Admin', 'Admin', 'Secretariat', 'admin', 'admin', NULL),
+    (2, 'Beyet', 'Thomas', 'Eleve', 'thomas.beyet', 'thomas', 2025),
+    (3, 'Prof', 'Prof', 'Enseignant', 'prof', 'prof', NULL);
 
 INSERT INTO Classe
 VALUES 
@@ -107,7 +108,7 @@ VALUES
 INSERT INTO Bulletin
 VALUES
     (1, 2, '2019-2020', 1, 1, 17.08, "Excellent travail",  False),
-    (2, 2, '2019-2020', 1, 2, 19.73, "Travail remarquable",  False);
+    (2, 2, '2020-2021', 1, 2, 19.73, "Travail remarquable",  False);
 
     
 -- UPDATE Bulletin SET bull_locked = False WHERE bull_id = 1;
