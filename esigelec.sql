@@ -24,7 +24,7 @@ CREATE TABLE Utilisateurs (
     user_nom VARCHAR(30) NOT NULL,
     user_prenom VARCHAR(30) NOT NULL,
     user_statut VARCHAR(30) NOT NULL,
-    user_pseudo VARCHAR(30) NOT NULL DEFAULT '',
+    user_pseudo VARCHAR(30) NOT NULL DEFAULT '' UNIQUE, 
     user_password VARCHAR(30) NOT NULL,
     
     PRIMARY KEY(user_id)
@@ -50,9 +50,21 @@ CREATE TABLE Personne_Classe (
 )
 ENGINE = INNODB;
 
+
 CREATE TABLE Bulletin (
+    bull_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    bull_eleve INT UNSIGNED NOT NULL, -- id_eleve
     bull_annee VARCHAR(10) NOT NULL, -- 2021-2022 p.ex
-    bull_semestre INT NOT NULL
+    bull_semestre INT NOT NULL,
+    bull_matiere INT UNSIGNED NOT NULL, -- id_matière
+    bull_note DECIMAL(15,2),
+    bull_appreciation VARCHAR(1000),
+    bull_locked BOOLEAN DEFAULT False,
+    
+    CONSTRAINT fk_bull_id FOREIGN KEY (bull_eleve) REFERENCES Utilisateurs(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_bull_matiere FOREIGN KEY (bull_matiere) REFERENCES Matiere(mat_id) ON DELETE CASCADE,
+    
+    PRIMARY KEY(bull_id)
 )
 ENGINE = INNODB;
 --
@@ -62,7 +74,8 @@ ENGINE = INNODB;
 INSERT INTO Utilisateurs
 VALUES 
     (1, 'Admin', 'Admin', 'Secretariat', 'admin', 'admin'),
-    (2, 'Beyet', 'Thomas', 'Eleve', 'thomas.beyet', 'thomas');
+    (2, 'Beyet', 'Thomas', 'Eleve', 'thomas.beyet', 'thomas'),
+    (3, 'Prof', 'Prof', 'Enseignant', 'prof', 'prof');
 
 INSERT INTO Classe
 VALUES 
@@ -91,4 +104,11 @@ VALUES
     (12, 'Francais'), 
     (13, 'Chinois'); 
 
-	
+INSERT INTO Bulletin
+VALUES
+    (1, 2, '2019-2020', 1, 1, 17.08, "Excellent travail",  False),
+    (2, 2, '2019-2020', 1, 2, 19.73, "Travail remarquable",  False);
+
+    
+-- UPDATE Bulletin SET bull_locked = False WHERE bull_id = 1;
+-- SELECT user_nom, user_prenom, mat_nom, bull_note, bull_appreciation  FROM Bulletin INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere;
