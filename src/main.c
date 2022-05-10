@@ -10,7 +10,7 @@
 #define COLOR_MAGENTA "\x1b[35m"
 #define COLOR_WHITE   "\x1B[97m"
 
-#define TIME 2
+#define TIME 0
 
 #include "../include/menus.h"
 
@@ -167,7 +167,7 @@ void afficher_classe(MYSQL *con)
     int menu_aff_classe = menu_classe();
     sprintf(request,
             "SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
-			SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs AS uti  \
+			SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs AS uti \
 			INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
 			INNER JOIN Classe AS cla \
 			ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
@@ -265,21 +265,45 @@ void verif_enseignant()
     }
 }
 
-/*
-void assignation_classe ()
+
+void assignation_classe (MYSQL *con, struct Utilisateur user)
+{
+    char request [500];
+    printf("\nEntrer la classe assignees : \n");
+    int classe = menu_classe(); 	// Affichage menu classes
+    int id = get_id(con, user); 	// Récupération de l'id
+
+    /* -- Requete -- */
+    sprintf(request, "INSERT INTO Personne_Classe VALUES(%d, %d);", id, classe);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        //return 1;
+    }
+}
+
+void assignation_matiere (MYSQL *con, struct Utilisateur user)
 {
     int i=0;
     char request [500];
-    printf ("Dans quelle matiere est le prof?");
-    printf ("1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'");
-    while (i==0)
+    printf ("\n1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'\n");
+    printf ("\tDans quelle matiere est le prof?\n");
+    while (i<1 || i>13)
     {
         fflush(stdin);
         scanf ("%d", &i);
     }
-    sprintf(request, "INSERT INTO Matiere(mat_prof_nom, mat_prof_prenom, %s, %s);", utilisateur.nom, Utilisateurprenom;
+    int id = get_id(con, user); 	// Récupération de l'id
+
+    /* -- Requete -- */
+    sprintf(request, "INSERT INTO Personne_Matiere VALUES(%d, %d);", id, i);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        //return 1;
+    }
 }
-*/
+
 
 /* Vérifie si l'utilisateur entré est bien un secrétaire */
 void verif_secretariat()
@@ -331,12 +355,12 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con)
         break;
 
     case 2: // Enseignant
-        verif_enseignant();
+        //verif_enseignant();
         strcpy(user.statut, "Enseignant");
         break;
 
     case 3: // Secretariat
-        verif_secretariat();
+        //verif_secretariat();
         strcpy(user.statut, "Secretariat");
         break;
 
@@ -420,14 +444,15 @@ void add_user_database(MYSQL *con)
         ajouter_classe(con, utilisateur);
     }
 
-    /*else if(strcmp(utilisateur.statut, "Enseignant") == 0))
+    else if(strcmp(utilisateur.statut, "Enseignant") == 0)
     {
-    	continue;
+    	assignation_classe (con, utilisateur);
+    	assignation_matiere (con, utilisateur);
     }
-    else if(strcmp(utilisateur.statut, "Secretariat") == 0))
+    /*else if(strcmp(utilisateur.statut, "Secretariat") == 0))
     {
     	continue;
-    } */
+    }*/
     effacer_console(TIME);
     afficher_pseudo(con, utilisateur);
     printf(COLOR_MAGENTA "\t\n%s %s a bien été ajouté.e à la base de données !\n\n" COLOR_RESET,
