@@ -10,7 +10,7 @@
 #define COLOR_MAGENTA "\x1b[35m"
 #define COLOR_WHITE   "\x1B[97m"
 
-#define TIME 2
+#define TIME 0
 
 #include "../include/menus.h"
 
@@ -30,7 +30,7 @@ void effacer_console(float pause)
 int get_id(MYSQL *con, struct Utilisateur user)
 {
     /* Paramètres :
-    	connexion MYSQL, Utilisateur
+    	connexion MYSQL, utilisateur
       Retourne:
     	int : id de l'utilisateur souhaité, à partir de son prénom & nom */
 
@@ -248,6 +248,45 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user)
     }
 }
 
+// Ajoute la promo si l'utilisateur est un élève
+void ajouter_promo(MYSQL *con, struct Utilisateur user)
+{
+	char request[100];
+	int promo;
+    printf("Quelle est la promo ?\n");
+	scanf("%d", &promo);
+    int id = get_id(con, user); 	// Récupération de l'id
+
+    /* -- Requete -- */
+    sprintf(request, "UPDATE Utilisateurs SET user_promo = %d WHERE user_id = %d;", promo, id);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        //return 1;
+    }
+}
+
+
+void verrouiller_bulletin(MYSQL *con, struct Utilisateur user)
+{
+	char request [500];
+	char annee [15];
+	int semestre, promo;
+	printf("Quelle promo souhaitez verrouiller ?");
+	scanf("%d", &promo);
+	printf("Entrer l'année à verrouiller : ");
+	scanf("%s", annee);
+	printf("Semestre n° :");
+	scanf("%d", &semestre);
+	sprintf(request, "UPDATE Bulletin INNER JOIN Utilisateurs SET bull_locked = True WHERE bull_annee = '%s' AND bull_semestre = %d AND user_promo = %d; ", annee, semestre, promo);
+	printf("%s", request);
+	if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        //return 1;
+    }
+}
+
 /* Vérifie si l'utilisateur entré est bien un enseignant */
 void verif_enseignant()
 {
@@ -366,6 +405,32 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
     }
 }
 
+
+int supprimer_users(MYSQL *con)
+{
+    int indice;
+    char request [50];
+    printf("A partir de quel id voulez-vous supprimer les élèves ?");
+    scanf("%d", &indice);
+    sprintf(request, "DELETE FROM Utilisateurs WHERE user_id > %d", indice);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return(1);
+    }
+
+    /* Reinitialisation des user_id au nombre voulu */
+    sprintf(request,"ALTER TABLE Utilisateurs AUTO_INCREMENT = %d", indice);
+    if(mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return(1);
+    }
+    printf("Utilisateurs supprimés\n");
+    return(1);
+}
+
+
 void afficher_pseudo(MYSQL *con, struct Utilisateur user)
 {
     char request[500];
@@ -418,6 +483,7 @@ void add_user_database(MYSQL *con)
     if(strcmp(utilisateur.statut, "Eleve") == 0)
     {
         ajouter_classe(con, utilisateur);
+        ajouter_promo(con, utilisateur);
     }
 
     /*else if(strcmp(utilisateur.statut, "Enseignant") == 0))
@@ -428,7 +494,7 @@ void add_user_database(MYSQL *con)
     {
     	continue;
     } */
-    effacer_console(TIME);
+    effacer_console(0);
     afficher_pseudo(con, utilisateur);
     printf(COLOR_MAGENTA "\t\n%s %s a bien été ajouté.e à la base de données !\n\n" COLOR_RESET,
            utilisateur.prenom, utilisateur.nom);
@@ -489,6 +555,14 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
             case 3:
                 afficher_nb_eleve(con);
                 break;
+			case 4:
+				verrouiller_bulletin(con, user);
+				break;
+
+			case 10:
+				supprimer_users(con);
+				break;
+
             case 0:
                 printf("Déconnexion réussie\n");
                 effacer_console(1);
@@ -606,42 +680,24 @@ void connexion_utilisateur(MYSQL *con)
         effacer_console(TIME);
         connexion_utilisateur(con);
     }
-    else
+    else if(correspondance == 1)
     {
         printf("Connexion établie\n");
         effacer_console(TIME);
         char * statut = get_status(con, user); // on récupère le statut de l'utilisateur
         menus_connexion(statut, con, user);
     }
+    else
+    {
+		printf("Erreur : plus d'une personne correspond à ces critères.\n");
+    }
     mysql_free_result(result);
 }
 
-int supprimer_users(MYSQL *con)
-{
-    int indice;
-    char request [50];
-    printf("A partir de quel id voulez-vous supprimer les élèves ?");
-    scanf("%d", &indice);
-    sprintf(request, "DELETE FROM Utilisateurs WHERE user_id > %d", indice);
-    if (mysql_query(con, request))
-    {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return(1);
-    }
-
-    /* Reinitialisation des user_id au nombre voulu */
-    sprintf(request,"ALTER TABLE Utilisateurs AUTO_INCREMENT = %d", indice);
-    if(mysql_query(con, request))
-    {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return(1);
-    }
-    printf("Utilisateurs supprimés\n");
-    return(1);
-}
 
 int main()
 {
+
     /*  == Initialisation Database ==*/
     MYSQL *con = mysql_init(NULL);
     if(con == NULL)
@@ -679,3 +735,5 @@ int main()
     mysql_close(con);
     return 0;
 }
+
+// end
