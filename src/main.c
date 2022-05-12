@@ -171,7 +171,7 @@ void afficher_classe(MYSQL *con)
 			INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
 			INNER JOIN Classe AS cla \
 			ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
-
+	printf("%s", request);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -183,7 +183,7 @@ void afficher_classe(MYSQL *con)
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
-    effacer_console(0);
+    //effacer_console(0);
     while ((row = mysql_fetch_row(result)))
     {
         for(int i = 0; i < num_fields; i++)
@@ -269,7 +269,8 @@ void verif_enseignant()
 void assignation_classe (MYSQL *con, struct Utilisateur user)
 {
     char request [500];
-    printf("\nEntrer la classe assignees : \n");
+    int choix;
+    printf("\nEntrer la classe assignee : \n");
     int classe = menu_classe(); 	// Affichage menu classes
     int id = get_id(con, user); 	// Récupération de l'id
 
@@ -280,6 +281,26 @@ void assignation_classe (MYSQL *con, struct Utilisateur user)
         fprintf(stderr, "%s\n", mysql_error(con));
         //return 1;
     }
+
+	while(choix != 1 || choix != 2)
+	{
+		effacer_console(0);
+		printf("Ce professeur est il/elle en charge d'une autre classe ?\n");
+		printf("1. Oui \n2. Non\n");
+		scanf("%d", &choix);
+		if(choix == 1)
+		{
+			assignation_classe(con, user);
+		}
+		else if(choix == 2)
+		{
+			goto jump;
+			break;
+		}
+	jump:
+		printf("Super");
+		break;
+	}
 }
 
 void assignation_matiere (MYSQL *con, struct Utilisateur user)
@@ -446,8 +467,10 @@ void add_user_database(MYSQL *con)
 
     else if(strcmp(utilisateur.statut, "Enseignant") == 0)
     {
-    	assignation_classe (con, utilisateur);
-    	assignation_matiere (con, utilisateur);
+		effacer_console(0);
+		assignation_matiere(con, utilisateur);
+    	assignation_classe(con, utilisateur);
+    	printf("suite assig classe");
     }
     /*else if(strcmp(utilisateur.statut, "Secretariat") == 0))
     {
@@ -459,6 +482,29 @@ void add_user_database(MYSQL *con)
            utilisateur.prenom, utilisateur.nom);
 }
 
+int supprimer_users(MYSQL *con)
+{
+    int indice;
+    char request [50];
+    printf("A partir de quel id voulez-vous supprimer les élèves ?");
+    scanf("%d", &indice);
+    sprintf(request, "DELETE FROM Utilisateurs WHERE user_id > %d", indice);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return(1);
+    }
+
+    /* Reinitialisation des user_id au nombre voulu */
+    sprintf(request,"ALTER TABLE Utilisateurs AUTO_INCREMENT = %d", indice);
+    if(mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        return(1);
+    }
+    printf("Utilisateurs supprimés\n");
+    return(1);
+}
 
 void modifier_password(MYSQL *con, struct Utilisateur user)
 {
@@ -514,6 +560,9 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
             case 3:
                 afficher_nb_eleve(con);
                 break;
+			case 10:
+				supprimer_users(con);
+				break;
             case 0:
                 printf("Déconnexion réussie\n");
                 effacer_console(1);
@@ -639,30 +688,6 @@ void connexion_utilisateur(MYSQL *con)
         menus_connexion(statut, con, user);
     }
     mysql_free_result(result);
-}
-
-int supprimer_users(MYSQL *con)
-{
-    int indice;
-    char request [50];
-    printf("A partir de quel id voulez-vous supprimer les élèves ?");
-    scanf("%d", &indice);
-    sprintf(request, "DELETE FROM Utilisateurs WHERE user_id > %d", indice);
-    if (mysql_query(con, request))
-    {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return(1);
-    }
-
-    /* Reinitialisation des user_id au nombre voulu */
-    sprintf(request,"ALTER TABLE Utilisateurs AUTO_INCREMENT = %d", indice);
-    if(mysql_query(con, request))
-    {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        return(1);
-    }
-    printf("Utilisateurs supprimés\n");
-    return(1);
 }
 
 int main()
