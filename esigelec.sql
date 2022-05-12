@@ -44,11 +44,15 @@ ENGINE = INNODB;
 CREATE TABLE Personne_Classe ( 
     id_personne INT UNSIGNED NOT NULL,
     classe_id INT UNSIGNED NOT NULL,
-    PRIMARY KEY(id_personne),
+    -- PRIMARY KEY(id_personne)
     CONSTRAINT fk_classe_id FOREIGN KEY (classe_id) REFERENCES Classe(classe_id) ON DELETE CASCADE,
-    CONSTRAINT fk_user_id FOREIGN KEY (id_personne) REFERENCES Utilisateurs(user_id) ON DELETE CASCADE 
+    CONSTRAINT fk_user_id FOREIGN KEY (id_personne) REFERENCES Utilisateurs(user_id) ON DELETE CASCADE,
+
+    CONSTRAINT pk_personne_classe PRIMARY KEY(id_personne, classe_id) 
 )
 ENGINE = INNODB;
+
+-- ALTER TABLE Personne_Classe ADD CONSTRAINT pk_personne_classe PRIMARY KEY(id_personne, classe_id);
 
 CREATE TABLE Personne_Matiere ( 
     id_personne INT UNSIGNED NOT NULL,
@@ -58,6 +62,8 @@ CREATE TABLE Personne_Matiere (
     -- CONSTRAINT fk_user_id FOREIGN KEY (id_personne) REFERENCES Utilisateurs(user_id) ON DELETE CASCADE 
 )
 ENGINE = INNODB;
+
+
 
 CREATE TABLE Bulletin (
     bull_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -120,3 +126,6 @@ VALUES
     
 -- UPDATE Bulletin SET bull_locked = False WHERE bull_id = 1;
 -- SELECT user_nom, user_prenom, mat_nom, bull_note, bull_appreciation  FROM Bulletin INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere;
+
+-- Affichage dont le prof est reponsable : 
+-- SELECT  user_nom, user_prenom,  classe_nom  FROM Utilisateurs  INNER JOIN Personne_Classe as persCla ON id_personne = user_id INNER JOIN Classe as cla on cla.classe_id = persCla.classe_id ORDER BY user_nom;
