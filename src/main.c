@@ -170,8 +170,7 @@ void afficher_classe(MYSQL *con)
 			SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs AS uti \
 			INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
 			INNER JOIN Classe AS cla \
-			ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
-	printf("%s", request);
+			ON cla.classe_id = pc.classe_id WHERE uti.user_statut = 'Eleve' AND cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
