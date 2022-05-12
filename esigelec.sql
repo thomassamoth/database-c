@@ -73,7 +73,7 @@ ENGINE = INNODB;
 --
 
 INSERT INTO Utilisateurs
-VALUES 
+VALUES
     (1, 'Admin', 'Admin', 'Secretariat', 'admin', 'admin', NULL),
     (2, 'Beyet', 'Thomas', 'Eleve', 'thomas.beyet', 'thomas', 2025),
     (3, 'Prof', 'Prof', 'Enseignant', 'prof', 'prof', NULL);
@@ -112,4 +112,6 @@ VALUES
 
     
 -- UPDATE Bulletin SET bull_locked = False WHERE bull_id = 1;
--- SELECT user_nom, user_prenom, mat_nom, bull_note, bull_appreciation  FROM Bulletin INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere;
+-- SELECT user_nom, user_prenom, mat_nom, bull_note, bull_appreciation  FROM Bulletin 
+-- INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere;
+
