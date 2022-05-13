@@ -156,9 +156,8 @@ void afficher_classe(MYSQL *con)
     do
     {
         menu_aff_classe = menu_classe();
-
     }
-    while(menu_aff_classe != 1 && menu_aff_classe != 2 && menu_aff_classe != 3 && menu_aff_classe != 4 );
+    while(menu_aff_classe != 1 && menu_aff_classe != 2 && menu_aff_classe != 3 && menu_aff_classe != 4);
 
     sprintf(request,
             "SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
@@ -266,9 +265,12 @@ void verrouiller_bulletin(MYSQL *con, struct Utilisateur user)
     scanf("%s", annee);
     printf("Semestre n° :");
     scanf("%d", &semestre);
-    sprintf(request, "UPDATE Bulletin INNER JOIN Utilisateurs SET bull_locked = True WHERE bull_annee = '%s' AND bull_semestre = %d AND user_promo = %d; ",
+
+    sprintf(request, "UPDATE Bulletin INNER JOIN Utilisateurs SET bull_locked = True \
+		WHERE bull_annee = '%s' AND bull_semestre = %d AND user_promo = %d; ",
             annee, semestre, promo);
 
+    printf("%s", request);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -545,7 +547,8 @@ void add_user_database(MYSQL *con)
         assignation_matiere(con, utilisateur);
         assignation_classe(con, utilisateur);
     }
-    /*else if(strcmp(utilisateur.statut, "Secretariat") == 0))
+    /*
+    else if(strcmp(utilisateur.statut, "Secretariat") == 0))
     {
     	continue;
     }

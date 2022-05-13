@@ -87,9 +87,9 @@ ENGINE = INNODB;
 --
 
 INSERT INTO Utilisateurs
-VALUES 
+VALUES
     (1, 'Admin', 'Admin', 'Secretariat', 'admin', 'admin', NULL),
-    (2, 'Beyet', 'Thomas', 'Eleve', 'thomas.beyet', 'thomas', 2025),
+    (2, 'Martin', 'Jean', 'Eleve', 'jean.martin', 'jean', 2025),
     (3, 'Prof', 'Prof', 'Enseignant', 'prof', 'prof', NULL);
 
 INSERT INTO Classe
@@ -130,13 +130,14 @@ VALUES
 INSERT INTO Bulletin
 VALUES
     (1, 2, '2019-2020', 1, 1, 17.08, "Excellent travail",  False),
-    (2, 2, '2019-2020', 1, 2, 19.73, "Travail remarquable",  False);
+    (2, 2, '2020-2021', 1, 2, 19.73, "Travail remarquable",  False);
 
 -- VERROUILLER BULLETINS
 -- UPDATE Bulletin SET bull_locked = False WHERE bull_id = 1;
 
+
 -- AFFICHER BULLETINS
 -- SELECT user_nom, user_prenom, mat_nom, bull_note, bull_appreciation  FROM Bulletin INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere;
 
--- Affichage dont le prof est reponsable : 
+-- AFFICHAGE DES CLASSES DONT LE PROF EST REPONSABLE : 
 -- SELECT  user_nom, user_prenom, classe_nom  FROM Utilisateurs  INNER JOIN Personne_Classe as persCla ON id_personne = user_id INNER JOIN Classe as cla on cla.classe_id = persCla.classe_id WHERE user_statut = "Enseignant" ORDER BY user_nom;
