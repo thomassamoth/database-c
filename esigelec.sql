@@ -45,11 +45,25 @@ ENGINE = INNODB;
 CREATE TABLE Personne_Classe ( 
     id_personne INT UNSIGNED NOT NULL,
     classe_id INT UNSIGNED NOT NULL,
-    PRIMARY KEY(id_personne),
+    -- PRIMARY KEY(id_personne)
     CONSTRAINT fk_classe_id FOREIGN KEY (classe_id) REFERENCES Classe(classe_id) ON DELETE CASCADE,
-    CONSTRAINT fk_user_id FOREIGN KEY (id_personne) REFERENCES Utilisateurs(user_id) ON DELETE CASCADE 
+    CONSTRAINT fk_user_id FOREIGN KEY (id_personne) REFERENCES Utilisateurs(user_id) ON DELETE CASCADE,
+
+    CONSTRAINT pk_personne_classe PRIMARY KEY(id_personne, classe_id) 
 )
 ENGINE = INNODB;
+
+-- ALTER TABLE Personne_Classe ADD CONSTRAINT pk_personne_classe PRIMARY KEY(id_personne, classe_id);
+
+CREATE TABLE Personne_Matiere ( 
+    id_personne INT UNSIGNED NOT NULL,
+    matiere_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY(id_personne),
+    CONSTRAINT fk_matiere_id FOREIGN KEY (matiere_id) REFERENCES Matiere(mat_id) ON DELETE CASCADE
+    -- CONSTRAINT fk_user_id FOREIGN KEY (id_personne) REFERENCES Utilisateurs(user_id) ON DELETE CASCADE 
+)
+ENGINE = INNODB;
+
 
 
 CREATE TABLE Bulletin (
@@ -75,7 +89,7 @@ ENGINE = INNODB;
 INSERT INTO Utilisateurs
 VALUES
     (1, 'Admin', 'Admin', 'Secretariat', 'admin', 'admin', NULL),
-    (2, 'Beyet', 'Thomas', 'Eleve', 'thomas.beyet', 'thomas', 2025),
+    (2, 'Martin', 'Jean', 'Eleve', 'jean.martin', 'jean', 2025),
     (3, 'Prof', 'Prof', 'Enseignant', 'prof', 'prof', NULL);
 
 INSERT INTO Classe
@@ -87,7 +101,11 @@ VALUES
 
 INSERT INTO Personne_Classe
 VALUES
-    (2, 1);
+    (2, 1),
+    (3, 1),
+    (3, 2),
+    (3, 3),
+    (3, 4);
     
 INSERT INTO Matiere 
 VALUES
@@ -105,13 +123,21 @@ VALUES
     (12, 'Francais'), 
     (13, 'Chinois'); 
 
+INSERT INTO Personne_Matiere
+VALUES
+    (3, 6);
+
 INSERT INTO Bulletin
 VALUES
     (1, 2, '2019-2020', 1, 1, 17.08, "Excellent travail",  False),
     (2, 2, '2020-2021', 1, 2, 19.73, "Travail remarquable",  False);
 
-    
+-- VERROUILLER BULLETINS
 -- UPDATE Bulletin SET bull_locked = False WHERE bull_id = 1;
--- SELECT user_nom, user_prenom, mat_nom, bull_note, bull_appreciation  FROM Bulletin 
--- INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere;
 
+
+-- AFFICHER BULLETINS
+-- SELECT user_nom, user_prenom, mat_nom, bull_note, bull_appreciation  FROM Bulletin INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere;
+
+-- AFFICHAGE DES CLASSES DONT LE PROF EST REPONSABLE : 
+-- SELECT  user_nom, user_prenom, classe_nom  FROM Utilisateurs  INNER JOIN Personne_Classe as persCla ON id_personne = user_id INNER JOIN Classe as cla on cla.classe_id = persCla.classe_id WHERE user_statut = "Enseignant" ORDER BY user_nom;

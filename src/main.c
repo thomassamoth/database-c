@@ -9,7 +9,7 @@
 #define COLOR_RESET   "\x1b[0m"
 #define COLOR_MAGENTA "\x1b[35m"
 #define COLOR_WHITE   "\x1B[97m"
-#define COLOR_YELLOW  "\x1B[33m"
+#define COLOR_YELLOW  "\x1B[93m"
 
 #define TIME 2
 
@@ -150,15 +150,21 @@ void rechercher_eleve(MYSQL *con, struct Utilisateur user)
 void afficher_classe(MYSQL *con)
 {
     char request [500];
-    printf("Quelle classe voulez-vous voir ?\n");
-    int menu_aff_classe = menu_classe();
+    printf("Quelle classe voulez-vous afficher ?\n");
+    int menu_aff_classe;
+    // Verification que l'on a toujours une réponse voulue
+    do
+    {
+        menu_aff_classe = menu_classe();
+    }
+    while(menu_aff_classe != 1 && menu_aff_classe != 2 && menu_aff_classe != 3 && menu_aff_classe != 4);
+
     sprintf(request,
             "SELECT concat('Liste des eleves de la classe : ', classe_nom, '\n') FROM Classe WHERE classe_id = '%d' UNION \
-			SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs AS uti  \
+			SELECT concat('\t', user_prenom, ' ', upper(user_nom))FROM Utilisateurs AS uti \
 			INNER JOIN Personne_Classe pc ON uti.user_id = pc.id_personne \
 			INNER JOIN Classe AS cla \
-			ON cla.classe_id = pc.classe_id WHERE cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
-
+			ON cla.classe_id = pc.classe_id WHERE uti.user_statut = 'Eleve' AND cla.classe_id = '%d' GROUP BY user_nom ASC;", menu_aff_classe, menu_aff_classe); //maxi requète :-)
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -170,7 +176,7 @@ void afficher_classe(MYSQL *con)
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
-    effacer_console(0);
+    //effacer_console(0);
     while ((row = mysql_fetch_row(result)))
     {
         for(int i = 0; i < num_fields; i++)
@@ -200,7 +206,7 @@ void afficher_nb_eleve(MYSQL *con)
     {
         for(int i = 0; i < num_fields; i++)
         {
-            printf("Nombre d'élèves : %d\n", atoi(row[i])); // conversion en entier
+            printf("Nombre d'élèves : %d\n\n", atoi(row[i])); // conversion en entier
         }
     }
 }
@@ -246,6 +252,7 @@ void ajouter_promo(MYSQL *con, struct Utilisateur user)
     }
 }
 
+
 // Verrouille les bulletins d'une promo, d'une année précise et d'un semestre précis
 void verrouiller_bulletin(MYSQL *con, struct Utilisateur user)
 {
@@ -258,6 +265,7 @@ void verrouiller_bulletin(MYSQL *con, struct Utilisateur user)
     scanf("%s", annee);
     printf("Semestre n° :");
     scanf("%d", &semestre);
+
     sprintf(request, "UPDATE Bulletin INNER JOIN Utilisateurs SET bull_locked = True \
 		WHERE bull_annee = '%s' AND bull_semestre = %d AND user_promo = %d; ",
             annee, semestre, promo);
@@ -268,7 +276,10 @@ void verrouiller_bulletin(MYSQL *con, struct Utilisateur user)
         fprintf(stderr, "%s\n", mysql_error(con));
         //return 1;
     }
+    printf(COLOR_WHITE "Bulletins verrouillés pour la promo %d année %s semestre n° %d\n" COLOR_RESET, promo, annee, semestre);
+    effacer_console(TIME);
 }
+
 
 /* Vérifie si l'utilisateur entré est bien un enseignant */
 void verif_enseignant()
@@ -286,21 +297,75 @@ void verif_enseignant()
     }
 }
 
-/*
-void assignation_classe ()
+
+// Ajoute les classes à l'utilisateur de type Enseignant
+void assignation_classe (MYSQL *con, struct Utilisateur user)
+{
+    char request [500];
+    int choix;
+    int classe = 0; // = 0;
+    printf("\nEntrer la classe assignee : \n");
+    do
+    {
+        classe = menu_classe();
+
+    }
+    while(classe != 1 && classe != 2 && classe != 3 && classe != 4 );
+    int id = get_id(con, user); 	// Récupération de l'id
+
+    /* -- Requete -- */
+    sprintf(request, "INSERT INTO Personne_Classe VALUES(%d, %d);", id, classe);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        //return 1;
+    }
+
+    while(choix != 1 || choix != 2)
+    {
+        effacer_console(0);
+        printf("Ce professeur est il/elle en charge d'une autre classe ?\n");
+        printf("1. Oui \n2. Non\n");
+        scanf("%d", &choix);
+        if(choix == 1)
+        {
+            assignation_classe(con, user);
+        }
+        else if(choix == 2)
+        {
+            goto jump;
+            break;
+        }
+jump:
+        //printf("Super");
+        break;
+    }
+}
+
+
+// Assigne la matière que le prof enseigne
+void assignation_matiere (MYSQL *con, struct Utilisateur user)
 {
     int i=0;
     char request [500];
-    printf ("Dans quelle matiere est le prof?");
-    printf ("1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'");
-    while (i==0)
+    printf ("\n1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'\n");
+    printf ("\tDans quelle matiere est le prof?\n");
+    while (i<1 || i>13)
     {
         fflush(stdin);
         scanf ("%d", &i);
     }
-    sprintf(request, "INSERT INTO Matiere(mat_prof_nom, mat_prof_prenom, %s, %s);", utilisateur.nom, Utilisateurprenom;
+    int id = get_id(con, user); 	// Récupération de l'id
+
+    /* -- Requete -- */
+    sprintf(request, "INSERT INTO Personne_Matiere VALUES(%d, %d);", id, i);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        //return 1;
+    }
 }
-*/
+
 
 /* Vérifie si l'utilisateur entré est bien un secrétaire */
 void verif_secretariat()
@@ -476,14 +541,18 @@ void add_user_database(MYSQL *con)
         ajouter_promo(con, utilisateur);
     }
 
-    /*else if(strcmp(utilisateur.statut, "Enseignant") == 0))
+    else if(strcmp(utilisateur.statut, "Enseignant") == 0)
     {
-    	continue;
+        effacer_console(0);
+        assignation_matiere(con, utilisateur);
+        assignation_classe(con, utilisateur);
     }
+    /*
     else if(strcmp(utilisateur.statut, "Secretariat") == 0))
     {
     	continue;
-    } */
+    }
+    */
     effacer_console(0);
     afficher_pseudo(con, utilisateur);
     printf(COLOR_MAGENTA "\n%s %s a bien été ajouté.e à la base de données !\n\n" COLOR_RESET,
@@ -522,7 +591,7 @@ void modifier_password(MYSQL *con, struct Utilisateur user)
 }
 
 
-//affiche les menus en fonction du type d'utilisateurs.
+// Affiche les menus en fonction du type d'utilisateurs.
 void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
 {
     int menu_sec, menu_el, menu_ens;
@@ -544,6 +613,7 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
                 afficher_classe(con);
                 break;
             case 3:
+                effacer_console(0);
                 afficher_nb_eleve(con);
                 break;
             case 4:
@@ -555,7 +625,7 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
                 break;
 
             case 0:
-                printf("Déconnexion réussie\n");
+                printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
                 effacer_console(1);
                 break;
             default :
@@ -579,7 +649,7 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
                 modifier_password(con, user);
                 break;
             case 0:
-                printf("Déconnexion réussie\n");
+                printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
                 effacer_console(1);
                 break;
             default:
@@ -600,7 +670,7 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
             switch(menu_ens)
             {
             case 0:
-                printf("Déconnexion réussie\n");
+                printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
                 effacer_console(1);
                 break;
             case 1:
@@ -686,8 +756,6 @@ void connexion_utilisateur(MYSQL *con)
     }
     mysql_free_result(result);
 }
-
-
 
 
 int main()
