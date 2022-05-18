@@ -73,7 +73,7 @@ int menu_enseignant()
     int i;
     printf("== Enseignant ==\n");
     printf("1. Modifier votre mot de passe\n");
-    printf("2. Ecrire une appreciation a un eleve\n");
+    printf("2. Ecrire une appreciation à un eleve\n");
     printf("3. Voir appreciation\n");
     printf("0. Déconnexion\n");
     printf("Choix : ");
