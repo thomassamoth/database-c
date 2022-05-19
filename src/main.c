@@ -12,7 +12,7 @@
 #define COLOR_WHITE   "\x1B[97m"
 #define COLOR_YELLOW  "\x1B[93m"
 
-#define TIME 1.5
+#define TIME 2
 
 #include "../include/menus.h"
 
@@ -76,7 +76,6 @@ int get_id_via_pseudo(MYSQL *con, struct Utilisateur user)
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        printf ("get_id erreur \n");
         return 1;
     }
 
@@ -263,7 +262,7 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user)
     int id = get_id(con, user); 	// Récupération de l'id
 
     /* -- Requete -- */
-    sprintf(request, "INSERT INTO Personne_Classe VALUES(%d, %d, %d);", id, classe, user.groupe);
+    sprintf(request, "INSERT INTO Personne_Classe VALUES(%d, %d);", id, classe);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -415,8 +414,7 @@ void ajout_note (MYSQL *con, struct Utilisateur secretariat)
     char request [1200];
     struct Utilisateur eleve;
     char annee[10];
-    int matiere=0, semestre, id_eleve, id_secretariat;
-
+    int matiere=0, semestre, id_eleve;
     printf ("Entrer l'année scolaire (p.ex 2018-2019) : ");
     scanf("%s", annee);
     printf ("\nEntrer le semestre (1 ou 2) : ");
@@ -452,7 +450,7 @@ void ajout_note (MYSQL *con, struct Utilisateur secretariat)
         //return 1;
     }
     printf(COLOR_CYAN "Note ajoutée pour %s %s\n"COLOR_RESET, eleve.prenom, eleve.nom);
-    effacer_console(1.5);
+    effacer_console(TIME);
 }
 
 
@@ -724,10 +722,14 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
 void modifier_groupe(MYSQL *con, struct Utilisateur user)
 {
 	char request [500];
+	int id;
 	printf("Entrer le groupe : ");
 	scanf("%d", &user.groupe);
+
+	id = get_id(con, user);
+
     /* -- Ajout pseudo à la bdd -- */
-    sprintf(request, "UPDATE Utilisateurs SET user_groupe = %d", user.groupe);
+    sprintf(request, "UPDATE Utilisateurs SET user_groupe = %d WHERE user_id = %d", user.groupe, id);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -812,13 +814,12 @@ void add_user_database(MYSQL *con)
     }
     /* -- Creation pseudo -- */
     modifier_pseudo(con, utilisateur);
-    /* Creation groupe */
-    modifier_groupe(con, utilisateur);
 
     /* Fonctions spécifiques pour chaque type d'utilisateurs */
     if(strcmp(utilisateur.statut, "Eleve") == 0)
     {
         ajouter_classe(con, utilisateur);
+        modifier_groupe(con, utilisateur);
         ajouter_promo(con, utilisateur);
     }
 

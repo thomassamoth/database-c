@@ -57,13 +57,13 @@ int menu_secretariat()
 {
     int i;
     printf("== Secretariat ==\n");
-    printf("1. Ajouter utilisateur\n");
-    printf("2. Afficher les classes\n");
-    printf("3. Afficher le nombre d'élèves\n");
-    printf("4. Verrouiller les bulletins\n");
-    printf("5. Afficher bulletin\n");
-    printf("6. Ajouter note\n");
-    printf("0. Déconnexion\n");
+    printf("\t1. Ajouter utilisateur\n");
+    printf("\t2. Afficher les classes\n");
+    printf("\t3. Afficher le nombre d'élèves\n");
+    printf("\t4. Verrouiller les bulletins\n");
+    printf("\t5. Afficher bulletin\n");
+    printf("\t6. Ajouter note\n");
+    printf("\t0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
     return i;
@@ -89,7 +89,7 @@ int menu_enseignant()
 int menu_type_user()
 {
     int i;
-    printf("Quel type d'utilisateur êtes-vous ?\n\n");
+    printf("De quel type est l'utilisateur ?\n\n");
     printf("1 - Eleve\n");
     printf("2 - Enseignant\n");
     printf("3 - Secretariat\n");
