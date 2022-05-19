@@ -61,7 +61,8 @@ int menu_secretariat()
     printf("2. Afficher les classes\n");
     printf("3. Afficher le nombre d'élèves\n");
     printf("4. Verrouiller les bulletins\n");
-    printf("5. Afficher appréciation\n");
+    printf("5. Afficher bulletin\n");
+    printf("6. Ajouter note\n");
     printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);

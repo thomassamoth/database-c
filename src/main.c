@@ -903,6 +903,9 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
 			case 5:
 				afficher_bulletin(con);
 				break;
+			case 6:
+				ajout_note(con, user);
+				break;
 
             case 0:
                 printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);

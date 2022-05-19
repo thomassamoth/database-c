@@ -19,6 +19,7 @@ struct Utilisateur
     char pseudo[30];
     char password[30];
     char statut[30]; // permissions
+    int groupe;
 };
 
 
@@ -29,5 +30,7 @@ int menu_eleve();
 int menu_secretariat();
 int menu_enseignant();
 int menu_type_user();
+
+
 
 #endif
