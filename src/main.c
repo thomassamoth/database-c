@@ -408,6 +408,54 @@ void assignation_matiere (MYSQL *con, struct Utilisateur user)
 
 
 
+
+void ajout_note (MYSQL *con, struct Utilisateur secretariat)
+{
+    float note;
+    char request [1200];
+    struct Utilisateur eleve;
+    char annee[10];
+    int matiere=0, semestre, id_eleve, id_secretariat;
+
+    printf ("Entrer l'année scolaire (p.ex 2018-2019) : ");
+    scanf("%s", annee);
+    printf ("\nEntrer le semestre (1 ou 2) : ");
+    scanf("%d", &semestre);
+
+    printf("Entrer le prénom de l'élève souhaité : ");
+    scanf("%s", eleve.prenom);
+    printf("Entrer le nom de l'élève souhaité : ");
+    scanf("%s", eleve.nom);
+
+    printf("Entrer la matière où vous souhaitez saisir une note parmis les choix suivants: ");
+    printf ("\n1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n");
+    printf ("7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'\n");
+    while (matiere<1 || matiere>13)
+    {
+        fflush(stdin);
+        scanf("%d", &matiere);
+    }
+
+    id_eleve = get_id(con, eleve);
+
+    printf("\nSaisir la note finale : \n");
+    scanf("%f", &note);
+
+    /* Requete */
+    sprintf(request,
+			"INSERT INTO Bulletin(bull_eleve, bull_annee, bull_semestre, bull_matiere, bull_note) \
+			VALUES (%d, '%s', %d, %d, '%f');", id_eleve, annee, semestre, matiere, note);
+
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        //return 1;
+    }
+    printf(COLOR_CYAN "Note ajoutée pour %s %s\n"COLOR_RESET, eleve.prenom, eleve.nom);
+    effacer_console(1.5);
+}
+
+
 void ajout_appreciation (MYSQL *con, struct Utilisateur prof)
 {
     char appreciation[1000];
