@@ -385,7 +385,8 @@ void assignation_matiere (MYSQL *con, struct Utilisateur user)
 {
     int i=0;
     char request [500];
-    printf ("\n1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'\n");
+    printf ("\n1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n");
+    printf ("7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'\n");
 
     // On peut directement, au lieu de faire un printf, lire la table Bulletin.
     printf ("\tDans quelle matiere est le prof?\n");
@@ -527,15 +528,43 @@ void afficher_appreciation(MYSQL *con)
     }
 }
 
-/*void afficher_bulletin(MYSQL *con, struct Utilisateur user)
+
+void afficher_bulletin_eleve(MYSQL *con,  struct Utilisateur user)
 {
-	int id;
+    char request [500];
 
+    int id = get_id_via_pseudo(con, user);
 
+	//sprintf(request,"SELECT bull_appreciation FROM Bulletin WHERE bull_eleve = %d;", id);
+    sprintf(request, "SELECT mat_nom, bull_note,bull_appreciation FROM Bulletin INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere WHERE bull_eleve = %d;", id);
 
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+    }
+    MYSQL_RES *result = mysql_use_result(con);
+    if (result == NULL)
+    {
+        exit(1);
+    }
+	int num_fields = mysql_num_fields(result);
 
+    MYSQL_ROW row;
+	effacer_console(1);
+	printf("======================================================================\n");
+    printf("==                           BULLETIN                               ==\n");
+	printf("======================================================================\n");
 
-}*/
+    while ((row = mysql_fetch_row(result)))
+    {
+        for(int i = 0; i < num_fields; i++)
+        {
+			printf("%*s\t",12, row[i]);
+        }
+        printf("\n");
+    }
+}
+
 
 /* Vérifie si l'utilisateur entré est bien un secrétaire */
 void verif_secretariat()
@@ -789,6 +818,9 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
             case 4:
                 verrouiller_bulletin(con, user);
                 break;
+            case 5:
+                afficher_appreciation  (con);
+                break;
 
             case 10:
                 supprimer_users(con);
@@ -817,6 +849,9 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
             {
             case 1:
                 modifier_password(con, user);
+                break;
+            case 2:
+                afficher_bulletin_eleve (con, user);
                 break;
             case 0:
                 printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);

@@ -44,6 +44,7 @@ int menu_eleve()
     int i;
     printf("== Eleve ==\n");
     printf("1. Modifier votre mot de passe\n");
+    printf("2. Afficher bulletin\n");
     printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
@@ -60,6 +61,7 @@ int menu_secretariat()
     printf("2. Afficher les classes\n");
     printf("3. Afficher le nombre d'élèves\n");
     printf("4. Verrouiller les bulletins\n");
+    printf("5. Afficher appréciation\n");
     printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
