@@ -27,6 +27,7 @@ CREATE TABLE Utilisateurs (
     user_pseudo VARCHAR(30) NOT NULL DEFAULT '' UNIQUE, 
     user_password VARCHAR(30) NOT NULL,
     user_promo INT DEFAULT NULL,
+    user_groupe INT UNSIGNED DEFAULT NULL,
     
     PRIMARY KEY(user_id)
 )
@@ -88,9 +89,9 @@ ENGINE = INNODB;
 
 INSERT INTO Utilisateurs
 VALUES
-    (1, 'Admin', 'Admin', 'Secretariat', 'admin', 'admin', NULL),
-    (2, 'Martin', 'Jean', 'Eleve', 'jean.martin', 'jean', 2025),
-    (3, 'Prof', 'Prof', 'Enseignant', 'prof', 'prof', NULL);
+    (1, 'Admin', 'Admin', 'Secretariat', 'admin', 'admin', NULL, NULL),
+    (2, 'Martin', 'Jean', 'Eleve', 'jean.martin', 'jean', 2025, 1),
+    (3, 'Prof', 'Prof', 'Enseignant', 'prof', 'prof', NULL, NULL);
 
 INSERT INTO Classe
 VALUES 
