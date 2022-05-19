@@ -12,7 +12,7 @@
 #define COLOR_WHITE   "\x1B[97m"
 #define COLOR_YELLOW  "\x1B[93m"
 
-#define TIME 2
+#define TIME 1.5
 
 #include "../include/menus.h"
 
@@ -51,7 +51,6 @@ int get_id(MYSQL *con, struct Utilisateur user)
         return(1);
     }
     int num_fields = mysql_num_fields(result);
-    //printf ("num_field : %d\n", num_fields);
     MYSQL_ROW row;
     while ((row = mysql_fetch_row(result)))
     {
@@ -65,6 +64,7 @@ int get_id(MYSQL *con, struct Utilisateur user)
 }
 
 
+// Retourne l'id de l'utilisateur souhaité, à partir de son pseudo
 int get_id_via_pseudo(MYSQL *con, struct Utilisateur user)
 {
 
@@ -263,7 +263,7 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user)
     int id = get_id(con, user); 	// Récupération de l'id
 
     /* -- Requete -- */
-    sprintf(request, "INSERT INTO Personne_Classe VALUES(%d, %d);", id, classe);
+    sprintf(request, "INSERT INTO Personne_Classe VALUES(%d, %d, %d);", id, classe, user.groupe);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -308,7 +308,6 @@ void verrouiller_bulletin(MYSQL *con, struct Utilisateur user)
 		WHERE bull_annee = '%s' AND bull_semestre = %d AND user_promo = %d; ",
             annee, semestre, promo);
 
-    printf("%s", request);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -385,10 +384,12 @@ void assignation_matiere (MYSQL *con, struct Utilisateur user)
 {
     int i=0;
     char request [500];
-    printf ("\n1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n");
-    printf ("7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'\n");
+	printf ("\n1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n");
+	printf("4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n");
+    printf ("7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n");
+    printf("10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'\n");
 
-    // On peut directement, au lieu de faire un printf, lire la table Bulletin.
+
     printf ("\tDans quelle matiere est le prof?\n");
     while (i<1 || i>13)
     {
@@ -438,8 +439,6 @@ void ajout_appreciation (MYSQL *con, struct Utilisateur prof)
 			matiere = atoi(row[0]);
         }
     }
-	printf ("Matiere : %d\n", matiere);
-
 
     /*
     time_t timestamp;
@@ -481,26 +480,34 @@ void ajout_appreciation (MYSQL *con, struct Utilisateur prof)
         //return 1;
     }
     printf(COLOR_CYAN "Appréciation ajoutée pour %s %s\n"COLOR_RESET, eleve.prenom, eleve.nom);
-    effacer_console(1.5);
+    effacer_console(TIME);
 }
 
 
-void afficher_appreciation(MYSQL *con)
+void afficher_bulletin(MYSQL *con)
 {
     char request [500];
+    char annee [10];
     struct Utilisateur eleve;
+    int semestre;
 
     printf("Entrer le prénom de l'élève souhaité : ");
     scanf("%s", eleve.prenom);
     printf("Entrer le nom de l'élève souhaité : ");
     scanf("%s", eleve.nom);
+    printf("Entrer l'année du bulletin : ");
+    scanf("%s", annee);
+    printf("Entrer le semestre : ");
+    scanf("%d", &semestre);
 
     int id = get_id(con, eleve);
 
-
 	//sprintf(request,"SELECT bull_appreciation FROM Bulletin WHERE bull_eleve = %d;", id);
-    sprintf(request, "SELECT mat_nom, bull_note, bull_appreciation FROM Bulletin INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere WHERE bull_eleve = %d;", id);
-
+    sprintf(request, "SELECT mat_nom, bull_note, bull_appreciation FROM Bulletin \
+    INNER JOIN Utilisateurs ON bull_eleve = user_id \
+    INNER JOIN Matiere on mat_id = bull_matiere WHERE bull_eleve = %d \
+    AND bull_annee = '%s' AND bull_semestre = %d;", id, annee, semestre);
+	printf("%s", request);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -522,21 +529,31 @@ void afficher_appreciation(MYSQL *con)
     {
         for(int i = 0; i < num_fields; i++)
         {
-			printf("%*s\t",12, row[i]);
+			printf("%-*s",20, row[i]);
         }
         printf("\n");
     }
+    printf("\n\n");
 }
 
 
 void afficher_bulletin_eleve(MYSQL *con,  struct Utilisateur user)
 {
     char request [500];
+    char annee [10];
+    int semestre;
 
     int id = get_id_via_pseudo(con, user);
 
+    printf("Entrer l'année du bulletin : ");
+    scanf("%s", annee);
+    printf("Entrer le semestre : ");
+    scanf("%d", &semestre);
+
 	//sprintf(request,"SELECT bull_appreciation FROM Bulletin WHERE bull_eleve = %d;", id);
-    sprintf(request, "SELECT mat_nom, bull_note,bull_appreciation FROM Bulletin INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere WHERE bull_eleve = %d;", id);
+    sprintf(request, "SELECT mat_nom, bull_note,bull_appreciation FROM Bulletin \
+    INNER JOIN Utilisateurs ON bull_eleve = user_id \
+    INNER JOIN Matiere on mat_id = bull_matiere WHERE bull_eleve = %d AND bull_annee = '%s' AND bull_semestre = %d;", id, annee, semestre);
 
     if (mysql_query(con, request))
     {
@@ -559,10 +576,11 @@ void afficher_bulletin_eleve(MYSQL *con,  struct Utilisateur user)
     {
         for(int i = 0; i < num_fields; i++)
         {
-			printf("%*s\t",12, row[i]);
+			printf("%-*s",20, row[i]);
         }
         printf("\n");
     }
+    printf("\n\n");
 }
 
 
@@ -654,6 +672,20 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user) //OK
     }
 }
 
+// Modifie le groupe si utilisateur est un élève
+void modifier_groupe(MYSQL *con, struct Utilisateur user)
+{
+	char request [500];
+	printf("Entrer le groupe : ");
+	scanf("%d", &user.groupe);
+    /* -- Ajout pseudo à la bdd -- */
+    sprintf(request, "UPDATE Utilisateurs SET user_groupe = %d", user.groupe);
+    if (mysql_query(con, request))
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        //return;
+    }
+}
 
 // Supprime les utilisateurs de la bdd à partir de l'id fourni
 int supprimer_users(MYSQL *con)
@@ -732,6 +764,8 @@ void add_user_database(MYSQL *con)
     }
     /* -- Creation pseudo -- */
     modifier_pseudo(con, utilisateur);
+    /* Creation groupe */
+    modifier_groupe(con, utilisateur);
 
     /* Fonctions spécifiques pour chaque type d'utilisateurs */
     if(strcmp(utilisateur.statut, "Eleve") == 0)
@@ -749,7 +783,7 @@ void add_user_database(MYSQL *con)
     /*
     else if(strcmp(utilisateur.statut, "Secretariat") == 0))
     {
-    	continue;
+    	break;
     }
     */
     effacer_console(0);
@@ -818,13 +852,9 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
             case 4:
                 verrouiller_bulletin(con, user);
                 break;
-            case 5:
-                afficher_appreciation  (con);
-                break;
-
-            case 10:
-                supprimer_users(con);
-                break;
+			case 5:
+				afficher_bulletin(con);
+				break;
 
             case 0:
                 printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
@@ -850,9 +880,11 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
             case 1:
                 modifier_password(con, user);
                 break;
-            case 2:
+
+			case 2:
                 afficher_bulletin_eleve (con, user);
                 break;
+
             case 0:
                 printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
                 effacer_console(1);
@@ -885,7 +917,7 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
                 ajout_appreciation (con, user);
                 break;
             case 3:
-                afficher_appreciation  (con);
+                afficher_bulletin(con);
                 break;
             default:
                 printf("Erreur !");
@@ -952,7 +984,7 @@ void connexion_utilisateur(MYSQL *con)
     }
     else if(correspondance == 1)
     {
-        printf(COLOR_YELLOW "Connexion établie\n" COLOR_RESET);
+        printf(COLOR_YELLOW "Connexion réussie\n" COLOR_RESET);
         effacer_console(TIME);
         char * statut = get_status(con, user); // on récupère le statut de l'utilisateur
         menus_connexion(statut, con, user); // on affiche le menu correspondant à son statut
