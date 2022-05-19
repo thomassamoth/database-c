@@ -46,7 +46,7 @@ ENGINE = INNODB;
 CREATE TABLE Personne_Classe ( 
     id_personne INT UNSIGNED NOT NULL,
     classe_id INT UNSIGNED NOT NULL,
-    -- PRIMARY KEY(id_personne)
+    
     CONSTRAINT fk_classe_id FOREIGN KEY (classe_id) REFERENCES Classe(classe_id) ON DELETE CASCADE,
     CONSTRAINT fk_user_id FOREIGN KEY (id_personne) REFERENCES Utilisateurs(user_id) ON DELETE CASCADE,
 
