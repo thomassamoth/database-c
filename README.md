@@ -20,10 +20,9 @@ possible à un enseignant de modifier ses appréciations, ...
 
 ### 📝 Autres fonctionnalités 
 - [X] Un élève peut consulter ses bulletins (année par année / semestre par semestre)
-- [X] Un utilisateur peut se connecter et accéder aux fonctionnalités disponibles pour son statut.  
-*(fonctionnel même si les fonctions ne sont pas encore disponibles)*
+- [X] Un utilisateur peut se connecter et accéder aux fonctionnalités disponibles pour son statut
 - [X] Une personne du secrétariat peut créer un compte  
 
 ### Utilisation  
- - Executer le script sql avec `source esigelec.sql'  
+ - Executer le script SQL avec `source esigelec.sql`  
  - Compiler le projet dans CodeBlocks
