@@ -4,6 +4,7 @@
 #include<string.h>
 #include <unistd.h> //pause
 #include <time.h>
+#include <stdio_ext.h> //fpurge
 
 #define COLOR_RED     "\x1b[31m"
 #define COLOR_CYAN    "\x1b[36m"
@@ -212,7 +213,7 @@ void afficher_classe(MYSQL *con)
     }
     int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
-    //effacer_console(0);
+    effacer_console(0);
     while ((row = mysql_fetch_row(result)))
     {
         for(int i = 0; i < num_fields; i++)
@@ -424,8 +425,8 @@ void ajout_note (MYSQL *con, struct Utilisateur secretariat)
     scanf("%s", eleve.prenom);
     printf("Entrer le nom de l'élève souhaité : ");
     scanf("%s", eleve.nom);
-
-    printf("Entrer la matière où vous souhaitez saisir une note parmis les choix suivants: ");
+	effacer_console(0.5);
+    printf("Entrer la matière où vous souhaitez saisir une note parmiles choix suivants: ");
     printf ("\n1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n");
     printf ("7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'\n");
     while (matiere<1 || matiere>13)
@@ -517,8 +518,8 @@ void ajout_appreciation (MYSQL *con, struct Utilisateur prof)
 
     /* Requete */
     sprintf(request,
-			"INSERT INTO Bulletin(bull_eleve, bull_annee, bull_semestre, bull_matiere, bull_appreciation) \
-			VALUES (%d, '%s', %d, %d, '%s');", id_eleve, annee, semestre, matiere, appreciation);
+			"UPDATE Bulletin SET bull_appreciation = '%s' WHERE bull_eleve = %d AND bull_annee = '%s' AND bull_semestre = %d AND bull_matiere = %d;",
+			appreciation, id_eleve, annee, semestre, matiere);
 
     if (mysql_query(con, request))
     {

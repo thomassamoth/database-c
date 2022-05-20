@@ -57,12 +57,12 @@ int menu_secretariat()
 {
     int i;
     printf("== Secretariat ==\n");
-    printf("\t1. Ajouter utilisateur\n");
+    printf("\t1. Ajouter un utilisateur\n");
     printf("\t2. Afficher les classes\n");
     printf("\t3. Afficher le nombre d'élèves\n");
     printf("\t4. Verrouiller les bulletins\n");
-    printf("\t5. Afficher bulletin\n");
-    printf("\t6. Ajouter note\n");
+    printf("\t5. Afficher un bulletin\n");
+    printf("\t6. Ajouter une note\n");
     printf("\t0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
@@ -77,7 +77,7 @@ int menu_enseignant()
     printf("== Enseignant ==\n");
     printf("1. Modifier votre mot de passe\n");
     printf("2. Ecrire une appreciation à un eleve\n");
-    printf("3. Voir appreciation\n");
+    printf("3. Afficher un bulletin\n");
     printf("0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
