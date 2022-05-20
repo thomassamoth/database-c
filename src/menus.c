@@ -43,9 +43,9 @@ int menu_eleve()
 
     int i;
     printf("== Eleve ==\n");
-    printf("1. Modifier votre mot de passe\n");
-    printf("2. Afficher bulletin\n");
-    printf("0. Déconnexion\n");
+    printf("\t1. Modifier votre mot de passe\n");
+    printf("\t2. Afficher bulletin\n");
+    printf("\t0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
     return i;
@@ -75,10 +75,10 @@ int menu_enseignant()
 {
     int i;
     printf("== Enseignant ==\n");
-    printf("1. Modifier votre mot de passe\n");
-    printf("2. Ecrire une appreciation à un eleve\n");
-    printf("3. Afficher un bulletin\n");
-    printf("0. Déconnexion\n");
+    printf("\t1. Modifier votre mot de passe\n");
+    printf("\t2. Ecrire une appreciation à un eleve\n");
+    printf("\t3. Afficher un bulletin\n");
+    printf("\t0. Déconnexion\n");
     printf("Choix : ");
     scanf("%d", &i);
     return i;
@@ -89,10 +89,10 @@ int menu_enseignant()
 int menu_type_user()
 {
     int i;
-    printf("De quel type est l'utilisateur ?\n\n");
-    printf("1 - Eleve\n");
-    printf("2 - Enseignant\n");
-    printf("3 - Secretariat\n");
+    printf("De quel type est l'utilisateur ?\n");
+    printf("\t1 - Eleve\n");
+    printf("\t2 - Enseignant\n");
+    printf("\t3 - Secretariat\n");
     printf("Choix : ");
     scanf("%d",&i);
     printf("\n\n");

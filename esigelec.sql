@@ -54,14 +54,11 @@ CREATE TABLE Personne_Classe (
 )
 ENGINE = INNODB;
 
--- ALTER TABLE Personne_Classe ADD CONSTRAINT pk_personne_classe PRIMARY KEY(id_personne, classe_id);
-
 CREATE TABLE Personne_Matiere ( 
     id_personne INT UNSIGNED NOT NULL,
     matiere_id INT UNSIGNED NOT NULL,
     PRIMARY KEY(id_personne),
     CONSTRAINT fk_matiere_id FOREIGN KEY (matiere_id) REFERENCES Matiere(mat_id) ON DELETE CASCADE
-    -- CONSTRAINT fk_user_id FOREIGN KEY (id_personne) REFERENCES Utilisateurs(user_id) ON DELETE CASCADE 
 )
 ENGINE = INNODB;
 
@@ -73,7 +70,7 @@ CREATE TABLE Bulletin (
     bull_annee VARCHAR(10) NOT NULL, -- 2021-2022 p.ex
     bull_semestre INT NOT NULL,
     bull_matiere INT UNSIGNED NOT NULL, -- id_matière
-    bull_note DECIMAL(15,2),
+    bull_note DECIMAL(15,2), -- 2 décimales
     bull_appreciation VARCHAR(1000),
     bull_locked BOOLEAN DEFAULT False,
     
@@ -131,7 +128,15 @@ VALUES
 INSERT INTO Bulletin
 VALUES
     (1, 2, '2019-2020', 1, 1, 17.08, "Excellent travail",  False),
-    (2, 2, '2020-2021', 1, 2, 19.73, "Travail remarquable",  False);
+    (2, 2, '2020-2021', 1, 2, 19.73, "Travail remarquable",  False),
+    (3, 2, '2020-2021', 1, 3, 14.24, "Convenable",  False),
+    (4, 2, '2020-2021', 1, 4, 11.13, NULL, False),
+    (5, 2, '2020-2021', 1, 5, 10.73, "Résultats convenables", False),
+    (6, 2, '2020-2021', 1, 6, 9.48, "Satisfaisant", False),
+    (7, 2, '2020-2021', 1, 7, 11.13, NULL, False),
+    (8, 2, '2020-2021', 1, 8, 10.00, "Ensemble correct", False),
+    (9, 2, '2020-2021', 1, 9, 17.40, NULL, False),
+    (10, 2, '2020-2021', 1, 10, 11.13, NULL, False);
 
 -- VERROUILLER BULLETINS
 -- UPDATE Bulletin SET bull_locked = False WHERE bull_id = 1;

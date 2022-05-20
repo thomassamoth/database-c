@@ -11,15 +11,19 @@ Le logiciel permettra à un enseignant d'écrire une appréciation pour chaque
 élève des groupes dont il est responsable, uniquement dans la matière où il
 enseigne.   
 #### Fonctionnalités qui doivent être proposées aux utilisateurs :
-- [ ] Un enseignant peut consulter les appréciations écrites par les autres enseignants,
-- [ ] Un enseignant peut consulter les anciens bulletins (s'il y en a),
-- [ ] Un enseignant peut effectuer la recherche d'un élève (nom et prénom)
+- [X] Un enseignant peut consulter les appréciations écrites par les autres enseignants,
+- [X] Un enseignant peut consulter les anciens bulletins (s'il y en a),
+- [X] Un enseignant peut effectuer la recherche d'un élève (nom et prénom)
 et afficher son bulletin,
 - [ ] Tant que les bulletins n'ont pas été validés par le secrétariat, il est
 possible à un enseignant de modifier ses appréciations, ...
 
 ### 📝 Autres fonctionnalités 
-- [ ] Un élève peut consulter ses bulletins (année par année / semestre par semestre)
+- [X] Un élève peut consulter ses bulletins (année par année / semestre par semestre)
 - [X] Un utilisateur peut se connecter et accéder aux fonctionnalités disponibles pour son statut.  
 *(fonctionnel même si les fonctions ne sont pas encore disponibles)*
-- [X] Une personne du secrétariat peut créer un compte
+- [X] Une personne du secrétariat peut créer un compte  
+
+### Utilisation  
+ - Executer le script sql avec `source esigelec.sql'  
+ - Compiler le projet dans CodeBlocks
