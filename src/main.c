@@ -28,7 +28,6 @@ void effacer_console(float pause)
 {
     sleep(pause);
     printf("\033[2J\033[1;1H");
-    //printf("\n");
 }
 
 // Retourne l'id de l'utilisateur souhaité, à partir de son prénom & nom
@@ -99,21 +98,36 @@ int get_id_via_pseudo(MYSQL *con, struct Utilisateur user)
 }
 
 // Récuperer le verrouillage du bulletin
-/*int get_locked(MYSQL *con)
+int get_locked(MYSQL *con, char annee[], int semestre, int matiere)
 {
 	int locked;
+	char request [500];
 
-	sprintf(request, "SELECT bull_locked FROM Bulletin WHERE
+	sprintf(request, "SELECT bull_locked FROM Bulletin WHERE bull_matiere = %d AND bull_annee ='%s' AND bull_semestre = %d;", matiere, annee, semestre);
+
 
     if(mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        printf ("get_id erreur \n");
         return 1;
     }
+    MYSQL_RES *result = mysql_use_result(con);
+    if (result == NULL)
+    {
+        //return(1);
+    }
+    int num_fields = mysql_num_fields(result);
+    MYSQL_ROW row;
+    while ((row = mysql_fetch_row(result)))
+    {
+        for(int i = 0; i < num_fields; i++)
+        {
+            locked = atoi(row[0]); //copie du statut dans la variable retournée
+        }
+    }
 
-	return locked
-}*/
+	return locked;
+}
 
 
 // Retourne le statut de l'utilisateur à partir de son pseudo
@@ -490,48 +504,54 @@ void ajout_appreciation (MYSQL *con, struct Utilisateur prof)
         }
     }
 
-	// Récupération de l'année en cours
-    /*
-    time_t timestamp;
-    struct tm *t;
-    timestamp = time(NULL);
-    t = localtime(&timestamp);
-    sprintf (annee, "%04u",1900+t->tm_year);
-    printf("Annee : %s\n", annee);
-    */
 
     printf ("Entrer l'année scolaire (p.ex 2018-2019) : ");
     scanf("%s", annee);
     printf ("\nEntrer le semestre (1 ou 2) : ");
     scanf("%d", &semestre);
 
-    printf("Entrer le prénom de l'élève souhaité : ");
-    scanf("%s", eleve.prenom);
-    printf("Entrer le nom de l'élève souhaité : ");
-    scanf("%s", eleve.nom);
+    // Verification verrouillage bulletin
+    int locked = get_locked(con, annee, semestre, matiere);
 
-    id_eleve = get_id(con, eleve); // on récupère l'id de l'élève
-
-    // warning pour échapper les apostrophes et qu'elles soient prises en compte en SQL
-    printf(COLOR_RED
-           "\t/!\\ Penser à mettre deux apostrophes simples (') si l'appréciation en comporte une !" COLOR_RESET);
-
-    printf("\nRentrer l'appréciation : \n");
-    __fpurge(stdin);
-    fgets(appreciation, 1000, stdin); // prend en compte les espaces
-
-    /* Requete */
-    sprintf(request,
-            "UPDATE Bulletin SET bull_appreciation = '%s' WHERE bull_eleve = %d AND bull_annee = '%s' AND bull_semestre = %d AND bull_matiere = %d;",
-            appreciation, id_eleve, annee, semestre, matiere);
-
-    if (mysql_query(con, request))
+    if(locked == 1)
     {
-        fprintf(stderr, "%s\n", mysql_error(con));
-        //return 1;
+		printf(COLOR_YELLOW"Le bulletin pour l'année %s, semestre %d a été verrouillé.\n", annee, semestre);
+		printf("Il ne peut plus être modifié\n" COLOR_RESET);
+		effacer_console(TIME + 1);
     }
-    printf(COLOR_CYAN "Appréciation ajoutée pour %s %s\n"COLOR_RESET, eleve.prenom, eleve.nom);
-    effacer_console(TIME);
+
+    else if(locked == 0) // Les bulletins sont encore modifiables
+    {
+		printf("Entrer le prénom de l'élève souhaité : ");
+		scanf("%s", eleve.prenom);
+		printf("Entrer le nom de l'élève souhaité : ");
+		scanf("%s", eleve.nom);
+
+		id_eleve = get_id(con, eleve); // on récupère l'id de l'élève
+
+		// warning pour échapper les apostrophes et qu'elles soient prises en compte en SQL
+		printf(COLOR_RED
+			   "\t/!\\ Penser à mettre deux apostrophes simples (') si l'appréciation en comporte une !" COLOR_RESET);
+
+		printf("\nRentrer l'appréciation : \n");
+		__fpurge(stdin);
+		fgets(appreciation, 1000, stdin); // prend en compte les espaces
+
+		/* Requete */
+		sprintf(request,
+				"UPDATE Bulletin SET bull_appreciation = '%s' WHERE bull_eleve = %d AND bull_annee = '%s' AND bull_semestre = %d AND bull_matiere = %d;",
+				appreciation, id_eleve, annee, semestre, matiere);
+
+		if (mysql_query(con, request))
+		{
+			fprintf(stderr, "%s\n", mysql_error(con));
+			//return 1;
+		}
+		printf(COLOR_CYAN "Appréciation ajoutée pour %s %s\n"COLOR_RESET, eleve.prenom, eleve.nom);
+		effacer_console(TIME);
+    }
+
+
 }
 
 
@@ -539,6 +559,7 @@ void afficher_bulletin(MYSQL *con)
 {
     char request [500];
     char annee [10];
+    char affichage [500];
     struct Utilisateur eleve;
     int semestre;
 
@@ -574,8 +595,10 @@ void afficher_bulletin(MYSQL *con)
 
     MYSQL_ROW row;
     effacer_console(1);
+    // Concaténation de toutes les infos
+    sprintf(affichage, "\t\tBULLETIN de %s %s | %s - semestre %d \n", eleve.prenom, eleve.nom, annee, semestre);
     printf("======================================================================\n");
-    printf("==                           BULLETIN                               ==\n");
+    printf("%-*s\n",50, affichage);
     printf("======================================================================\n");
 
     while ((row = mysql_fetch_row(result)))
@@ -594,6 +617,7 @@ void afficher_bulletin_eleve(MYSQL *con,  struct Utilisateur user)
 {
     char request [500];
     char annee [10];
+    char affichage[500];
     int semestre;
 
     int id = get_id_via_pseudo(con, user);
@@ -622,9 +646,11 @@ void afficher_bulletin_eleve(MYSQL *con,  struct Utilisateur user)
 
     MYSQL_ROW row;
     effacer_console(1);
+    sprintf(affichage, "\t\tBULLETIN de %s %s | %s - semestre %d \n", user.prenom, user.nom, annee, semestre);
     printf("======================================================================\n");
-    printf("==                           BULLETIN                               ==\n");
+    printf("%-*s\n",50, affichage);
     printf("======================================================================\n");
+
 
     while ((row = mysql_fetch_row(result)))
     {
