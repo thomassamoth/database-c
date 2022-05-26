@@ -15,7 +15,7 @@ enseigne.
 - [X] Un enseignant peut consulter les anciens bulletins (s'il y en a),
 - [X] Un enseignant peut effectuer la recherche d'un élève (nom et prénom)
 et afficher son bulletin,
-- [ ] Tant que les bulletins n'ont pas été validés par le secrétariat, il est
+- [X] Tant que les bulletins n'ont pas été validés par le secrétariat, il est
 possible à un enseignant de modifier ses appréciations, ...
 
 ### 📝 Autres fonctionnalités 
