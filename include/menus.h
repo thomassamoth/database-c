@@ -1,36 +1,22 @@
 #ifndef MENUS_H
 #define MENUS_H
 
-//== LIBRAIRIES ==
-#include <mysql/mysql.h>
-#include<stdlib.h>
-#include <stdio.h>
-#include<string.h>
-#include <unistd.h> //pause
 
 // Fichiers
 #include "../include/menus.h"
-
-// Enregistrements
-struct Utilisateur
-{
-    char nom [30];
-    char prenom[30];
-    char pseudo[30];
-    char password[30];
-    char statut[30]; // permissions
-    int groupe;
-};
+#include "../include/main.h"
+#include "../include/utilisateur.h"
+#include "../include/bulletin.h"
 
 
-// Entêtes des fonctions d'affichage des menus avec les paramètres
+// Fonctions
 int menu_classe();
 int menu_principal();
 int menu_eleve();
 int menu_secretariat();
 int menu_enseignant();
 int menu_type_user();
-
+void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user);
 
 
 #endif

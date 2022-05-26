@@ -1,12 +1,9 @@
-#include <mysql/mysql.h>
-#include<stdlib.h>
-#include <stdio.h>
-#include<string.h>
-#include <unistd.h> //pause
-
 
 #include "../include/menus.h"
-
+#include "../include/utilisateur.h"
+#include "../include/affichage.h"
+#include "../include/main.h"
+#include "../include/bulletin.h"
 
 /* === FONCTIONS AFFICHAGE MENUS === */
 
@@ -97,4 +94,115 @@ int menu_type_user()
     scanf("%d",&i);
     printf("\n\n");
     return i;
+}
+
+
+// Affiche les menus en fonction du type d'utilisateurs.
+void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
+{
+    int menu_sec, menu_el, menu_ens;
+
+    /* ---- MENUS SPECIFIQUES ---- */
+    /* -- Secretariat -- */
+    if(strcmp(statut, "Secretariat") == 0)
+    {
+        do
+        {
+            menu_sec = menu_secretariat(); // MENU
+            switch(menu_sec)
+            {
+            case 1:
+                effacer_console(0);
+                add_user_database(con); //ajout d'un utilisateur à la bdd
+                break;
+            case 2:
+                afficher_classe(con);
+                break;
+            case 3:
+                effacer_console(0);
+                afficher_nb_eleve(con);
+                break;
+            case 4:
+                verrouiller_bulletin(con, user);
+                break;
+            case 5:
+                afficher_bulletin(con);
+                break;
+            case 6:
+                ajout_note(con, user);
+                break;
+
+            case 0:
+                printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
+                effacer_console(1);
+                break;
+            default :
+                printf("Erreur !\n");
+                break;
+            }
+
+        }
+        while(menu_sec != 0);
+
+    }
+    /* -- Eleve -- */
+    else if(strcmp(statut, "Eleve") == 0)
+    {
+        do
+        {
+            menu_el = menu_eleve(); // affichage menu
+            switch(menu_el)
+            {
+            case 1:
+                modifier_password(con, user);
+                break;
+
+            case 2:
+                afficher_bulletin_eleve (con, user);
+                break;
+
+            case 0:
+                printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
+                effacer_console(1);
+                break;
+            default:
+                printf("Erreur !\n");
+                break;
+            }
+
+        }
+        while(menu_el != 0);
+
+    }
+    /* -- Enseignant -- */
+    else if(strcmp(statut, "Enseignant") == 0)
+    {
+        do
+        {
+            menu_ens = menu_enseignant();
+            switch(menu_ens)
+            {
+            case 0:
+                printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
+                effacer_console(1);
+                break;
+            case 1:
+                modifier_password(con, user);
+                break;
+            case 2:
+                ajout_appreciation (con, user);
+                break;
+            case 3:
+                afficher_bulletin(con);
+                break;
+            default:
+                printf("Erreur !");
+                break;
+            }
+
+        }
+        while(menu_ens != 0);
+
+    }
+    free(statut); // on libère la mémoire de statut
 }
