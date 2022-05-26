@@ -25,4 +25,4 @@ possible à un enseignant de modifier ses appréciations, ...
 
 ### Utilisation  
  - Executer le script SQL avec `source esigelec.sql`  
- - Compiler le projet dans CodeBlocks
+ - Compiler le projet : `make`
