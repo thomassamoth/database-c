@@ -36,11 +36,24 @@
 			<Add option="-Wall" />
 			<Add option="-std=c99" />
 		</Compiler>
+		<Unit filename="include/affichage.h" />
+		<Unit filename="include/bulletin.h" />
+		<Unit filename="include/main.h" />
 		<Unit filename="include/menus.h" />
+		<Unit filename="include/utilisateur.h" />
+		<Unit filename="src/affichage.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/bulletin.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/menus.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/utilisateur.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions />
