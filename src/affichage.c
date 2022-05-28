@@ -20,7 +20,7 @@ void afficher_classe(MYSQL *con)
     char request[500];
     char request_2[500];
     char color[10]; // couleur d'affichage pour le titre
-
+    effacer_console(0);
     printf("Quelle classe voulez-vous afficher ?\n");
     int menu_aff_classe;
     // Verification que l'on a toujours une réponse voulue
@@ -98,7 +98,7 @@ void afficher_classe(MYSQL *con)
     {
         for (int i = 0; i < num_fields2; i++)
         {
-            printf(COLOR_MAGENTA "%s\n" COLOR_RESET, row2[i] ? row2[i] : "null"); // Affichage en magenta
+            printf("%s%s%s\n", COLOR_WHITE, row2[i] ? row2[i] : "null", COLOR_RESET);
         }
     }
     printf("\n\n");
@@ -122,7 +122,7 @@ void afficher_nb_eleve(MYSQL *con)
     {
         for (int i = 0; i < num_fields; i++)
         {
-            printf(COLOR_CYAN "Nombre d'élèves : %d\n\n" COLOR_RESET, atoi(row[i])); // conversion en entier
+            printf("Nombre d'élèves : %s%d\n\n%s", COLOR_CYAN, atoi(row[i]), COLOR_RESET); // conversion en entier
         }
     }
 }
@@ -153,8 +153,7 @@ void afficher_pseudo(MYSQL *con, struct Utilisateur user)
     {
         for (int i = 0; i < num_fields; i++)
         {
-            printf("\tVotre identifiant est %s %s %s\n", COLOR_CYAN,
-                   row[i] ? row[i] : "null", COLOR_RESET);
+            printf("\nVotre identifiant est%s %s %s\n", COLOR_CYAN, row[i] ? row[i] : "null", COLOR_RESET);
         }
     }
 }

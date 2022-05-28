@@ -134,7 +134,7 @@ void ajouter_promo(MYSQL *con, struct Utilisateur user)
 {
     char request[100];
     int promo;
-    printf("Quelle est la promo ?\n");
+    printf("Entrer la promo : ");
     scanf("%d", &promo);
     int id = get_id(con, user); // Récupération de l'id
 
@@ -143,7 +143,6 @@ void ajouter_promo(MYSQL *con, struct Utilisateur user)
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        // return 1;
     }
 }
 
@@ -164,7 +163,6 @@ void ajouter_classe(MYSQL *con, struct Utilisateur user)
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        // return 1;
     }
 }
 
@@ -214,19 +212,18 @@ void assignation_classe(MYSQL *con, struct Utilisateur user)
 // Assigne la matière que le prof enseigne
 void assignation_matiere(MYSQL *con, struct Utilisateur user)
 {
-    int i = 0;
+    int matiere = 0;
     char request[500];
     menu_matieres();
-
     printf("\tQuelle matière le professeur enseigne-t-il ?\n");
-    while (i < 1 || i > 13)
+    while (matiere < 1 || matiere > 13)
     {
         fflush(stdin);
-        scanf("%d", &i);
+        scanf("%d", &matiere);
     }
     int id = get_id(con, user); // Récupération de l'id
     /* -- Requete -- */
-    sprintf(request, "INSERT INTO Personne_Matiere VALUES(%d, %d);", id, i);
+    sprintf(request, "INSERT INTO Personne_Matiere VALUES(%d, %d);", id, matiere);
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
@@ -269,13 +266,11 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con)
             break;
 
         case 2: // Enseignant
-            // verif_enseignant();
             strcpy(user.statut, "Enseignant");
             return user;
             break;
 
         case 3: // Secretariat
-            // verif_secretariat();
             strcpy(user.statut, "Secretariat");
             return user;
             break;
@@ -288,7 +283,6 @@ struct Utilisateur ajouter_utilisateur(MYSQL *con)
     return user;
 }
 
-
 // Modification du mot de passe d'un utilisateur
 void modifier_password(MYSQL *con, struct Utilisateur user)
 {
@@ -300,26 +294,26 @@ void modifier_password(MYSQL *con, struct Utilisateur user)
     /* Confirmation ancien mot de passe */
     while (strcmp(pwd_precedent, ancien_pwd) != 0)
     {
-        printf("Entrer votre ancien mot de passe : ");
+        printf("Entrer votre %sancien%s mot de passe : ", COLOR_MAGENTA, COLOR_RESET);
         scanf("%s", ancien_pwd);
     }
     printf("\n");
 
     /* -- Nouveau mot de passe -- */
-    printf("Entrer votre nouveau mot de passe : ");
+    printf("Entrer votre %snouveau%s mot de passe : ", COLOR_GREEN, COLOR_MAGENTA);
     scanf("%s", nouveau_pwd);
-    sprintf(request, "UPDATE Utilisateurs SET user_password = '%s' WHERE user_pseudo = '%s'",
+    sprintf(request,
+            "UPDATE Utilisateurs SET user_password = '%s' \
+            WHERE user_pseudo = '%s'", \
             nouveau_pwd, user.pseudo);
 
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        return;
     }
-    printf(COLOR_CYAN "Le mot de passe a été mis à jour avec succès !\n" COLOR_RESET);
+    printf("%sLe mot de passe a été mis à jour avec succès !\n%s", COLOR_CYAN, COLOR_RESET);
     effacer_console(TIME);
 }
-
 
 // Compte le nombre de personnes retournées correspondant au couple pseudo/password rentré
 // Si retourne 1 : identifiants corrects
@@ -348,7 +342,6 @@ void connexion_utilisateur(MYSQL *con)
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        // return 1;
     }
 
     MYSQL_RES *result = mysql_use_result(con);
@@ -368,7 +361,7 @@ void connexion_utilisateur(MYSQL *con)
     /* -- Conditions -- */
     if (correspondance == 0)
     {
-        printf(COLOR_RED "Informations de connexion erronées. Veuillez réessayer !\n" COLOR_RESET);
+        printf("%sInformations de connexion erronées. Veuillez réessayer !\n%s", COLOR_RED, COLOR_RESET);
         effacer_console(TIME);
         connexion_utilisateur(con);
     }
@@ -397,7 +390,7 @@ void add_user_database(MYSQL *con)
     /* -- Ajout à la bdd -- */
     sprintf(request,
             "INSERT INTO Utilisateurs(user_nom, user_prenom, user_statut, user_password) \
-		VALUES ('%s', '%s', '%s', '%s');",
+		    VALUES ('%s', '%s', '%s', '%s');",
             utilisateur.nom, utilisateur.prenom, utilisateur.statut, utilisateur.password);
 
     if (mysql_query(con, request))
@@ -424,8 +417,7 @@ void add_user_database(MYSQL *con)
 
     effacer_console(0);
     afficher_pseudo(con, utilisateur);
-    printf(COLOR_MAGENTA "\n%s %s a bien été ajouté.e à la base de données !\n\n" COLOR_RESET,
-           utilisateur.prenom, utilisateur.nom);
+    printf("\n%s %s %s a bien été ajouté.e à la base de données !\n\n%s", COLOR_YELLOW, utilisateur.prenom, utilisateur.nom, COLOR_RESET);
 }
 
 // Modifie le groupe si utilisateur est un élève
@@ -484,6 +476,5 @@ void modifier_pseudo(MYSQL *con, struct Utilisateur user)
     if (mysql_query(con, request))
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        // return;
     }
 }
