@@ -164,9 +164,8 @@ void ajout_note (MYSQL *con, struct Utilisateur secretariat)
     scanf("%s", eleve.nom);
     effacer_console(0.5);
 
-    printf("Entrer la matière où vous souhaitez saisir une note parmi les choix suivants: ");
-    printf ("\n1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n");
-    printf ("7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'\n");
+    printf("Entrer la matière où vous souhaitez saisir une note parmi les choix suivants: \n");
+    menu_matieres();
 
     while (matiere<1 || matiere>13)
     {
@@ -216,7 +215,7 @@ void afficher_bulletin(MYSQL *con)
 		"SELECT mat_nom, bull_note, bull_appreciation FROM Bulletin \
 		INNER JOIN Utilisateurs ON bull_eleve = user_id \
 		INNER JOIN Matiere on mat_id = bull_matiere WHERE bull_eleve = %d \
-		AND bull_annee = '%s' AND bull_semestre = %d;",
+		AND bull_annee = '%s' AND bull_semestre = %d ORDER BY mat_id;",
 		id, annee, semestre);
 
     if (mysql_query(con, request))
@@ -233,7 +232,7 @@ void afficher_bulletin(MYSQL *con)
     MYSQL_ROW row;
     effacer_console(1);
     // Concaténation de toutes les infos
-    sprintf(affichage, "\t\tBULLETIN de %s %s | %s - semestre %d \n", eleve.prenom, eleve.nom, annee, semestre);
+    sprintf(affichage, "\t\tBULLETIN de %s %s | %s - semestre %d", eleve.prenom, eleve.nom, annee, semestre);
     printf("======================================================================\n");
     printf("%-*s\n",50, affichage);
     printf("======================================================================\n");
@@ -283,7 +282,7 @@ void afficher_bulletin_eleve(MYSQL *con,  struct Utilisateur user)
 
     MYSQL_ROW row;
     effacer_console(1);
-    sprintf(affichage, "\t\tBULLETIN  | %s - semestre %d \n", annee, semestre); // Création ligne à afficher
+    sprintf(affichage, "\t\tBULLETIN  | %s - semestre %d", annee, semestre); // Création ligne à afficher
     printf("======================================================================\n");
     printf("%-*s\n",50, affichage);
     printf("======================================================================\n");

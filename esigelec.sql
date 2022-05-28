@@ -127,23 +127,13 @@ VALUES
 
 INSERT INTO Bulletin
 VALUES
-    (1, 2, '2019-2020', 1, 1, 17.08, "Excellent travail",  False),
+    (1, 2, '2020-2021', 1, 1, 17.08, "Excellent travail",  False),
     (2, 2, '2020-2021', 1, 2, 19.73, "Travail remarquable",  False),
     (3, 2, '2020-2021', 1, 3, 14.24, "Convenable",  False),
     (4, 2, '2020-2021', 1, 4, 11.13, NULL, False),
     (5, 2, '2020-2021', 1, 5, 10.73, "Résultats convenables", False),
-    (6, 2, '2020-2021', 1, 6, 9.48, "Satisfaisant", False),
+    (6, 2, '2020-2021', 1, 6,  9.48, "Satisfaisant", False),
     (7, 2, '2020-2021', 1, 7, 11.13, NULL, False),
     (8, 2, '2020-2021', 1, 8, 10.00, "Ensemble correct", False),
     (9, 2, '2020-2021', 1, 9, 17.40, NULL, False),
-    (10, 2, '2020-2021', 1, 10, 11.13, NULL, False);
-
--- VERROUILLER BULLETINS
--- UPDATE Bulletin SET bull_locked = False WHERE bull_id = 1;
-
-
--- AFFICHER BULLETINS
--- SELECT user_nom, user_prenom, mat_nom, bull_note, bull_appreciation  FROM Bulletin INNER JOIN Utilisateurs ON bull_eleve = user_id INNER JOIN Matiere on mat_id = bull_matiere;
-
--- AFFICHAGE DES CLASSES DONT LE PROF EST REPONSABLE : 
--- SELECT  user_nom, user_prenom, classe_nom  FROM Utilisateurs  INNER JOIN Personne_Classe as persCla ON id_personne = user_id INNER JOIN Classe as cla on cla.classe_id = persCla.classe_id WHERE user_statut = "Enseignant" ORDER BY user_nom;
+    (10,2, '2020-2021', 1,10, 11.13, NULL, False);
