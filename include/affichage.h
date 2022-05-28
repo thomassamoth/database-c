@@ -9,10 +9,8 @@
 #include <unistd.h> //pause
 
 // Fichiers
-#include "../include/menus.h"
-#include "../include/main.h"
-#include "../include/utilisateur.h"
-#include "../include/bulletin.h"
+#include "main.h"
+#include "menus.h"
 
 
 // Fonctions
