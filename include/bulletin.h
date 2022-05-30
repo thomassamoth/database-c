@@ -1,17 +1,10 @@
 #ifndef BULLETIN_H
 #define BULLETIN_H
 
-//== LIBRAIRIES ==
-#include <mysql/mysql.h>
-#include<stdlib.h>
-#include <stdio.h>
-#include<string.h>
-#include <unistd.h> //pause
-
 // Fichiers
-#include "../include/menus.h"
-#include "../include/main.h"
-//#include "../include/bulletin.h"
+#include "main.h"
+
+
 
 
 int get_locked(MYSQL *con, char annee[], int semestre, int matiere);

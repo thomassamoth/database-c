@@ -1,12 +1,10 @@
 
-// imports librairies dans main.h
 
 #include "../include/main.h"
+#include "../include/utilisateur.h"
 #include "../include/menus.h"
 #include "../include/affichage.h"
-#include "../include/utilisateur.h"
 #include "../include/bulletin.h"
-
 
 /* == FONCTIONS == */
 
@@ -26,6 +24,7 @@ int main()
     }
 
     /* == MENU PRINCIPAL == */
+    effacer_console(0);
     int main_menu;
     do
     {
@@ -38,10 +37,10 @@ int main()
             break;
 
         case 0:
-            printf("Au revoir !!\n");
+            printf("%sAu revoir !!\n%s", COLOR_YELLOW, COLOR_RESET);
             break;
         default:
-            printf("Erreur lors de votre choix ! Veuillez retenter.\n");
+            printf("%sErreur lors de votre choix ! Veuillez retenter.\n%s", COLOR_YELLOW, COLOR_RESET);
             effacer_console(TIME);
         }
     }

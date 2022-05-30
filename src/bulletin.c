@@ -62,7 +62,7 @@ void verrouiller_bulletin(MYSQL *con, struct Utilisateur user)
         fprintf(stderr, "%s\n", mysql_error(con));
         //return 1;
     }
-    printf(COLOR_WHITE "Bulletins verrouillés pour la promo %d année %s semestre n° %d\n" COLOR_RESET, promo, annee, semestre);
+    printf("%sBulletins verrouillés pour la promo %d année %s semestre n° %d\n%s",COLOR_WHITE, promo, annee, semestre, COLOR_RESET);
     effacer_console(TIME);
 }
 
@@ -108,8 +108,8 @@ void ajout_appreciation (MYSQL *con, struct Utilisateur prof)
 
     if(locked == 1)
     {
-		printf(COLOR_YELLOW"Le bulletin pour l'année %s, semestre %d a été verrouillé.\n", annee, semestre);
-		printf("Il ne peut plus être modifié\n" COLOR_RESET);
+		printf("%sLe bulletin pour l'année %s, semestre %d a été verrouillé.\n",COLOR_YELLOW, annee, semestre);
+		printf("Il ne peut plus être modifié\n%s", COLOR_RESET);
 		effacer_console(TIME + 1);
     }
 
@@ -123,8 +123,7 @@ void ajout_appreciation (MYSQL *con, struct Utilisateur prof)
 		id_eleve = get_id(con, eleve); // on récupère l'id de l'élève
 
 		// warning pour échapper les apostrophes et qu'elles soient prises en compte en SQL
-		printf(COLOR_RED
-			   "\t/!\\ Penser à mettre deux apostrophes simples (') si l'appréciation en comporte une !" COLOR_RESET);
+		printf("%s\n/!\\ Penser à mettre deux apostrophes simples (') si l'appréciation en comporte une !%s", COLOR_RED, COLOR_RESET);
 
 		printf("\nRentrer l'appréciation : \n");
 		__fpurge(stdin);
@@ -140,7 +139,7 @@ void ajout_appreciation (MYSQL *con, struct Utilisateur prof)
 			fprintf(stderr, "%s\n", mysql_error(con));
 			//return 1;
 		}
-		printf(COLOR_CYAN "Appréciation ajoutée pour %s %s\n"COLOR_RESET, eleve.prenom, eleve.nom);
+		printf("%sAppréciation ajoutée pour %s %s\n%s", COLOR_CYAN, eleve.prenom, eleve.nom, COLOR_RESET);
 		effacer_console(TIME);
     }
 }
@@ -164,9 +163,8 @@ void ajout_note (MYSQL *con, struct Utilisateur secretariat)
     scanf("%s", eleve.nom);
     effacer_console(0.5);
 
-    printf("Entrer la matière où vous souhaitez saisir une note parmi les choix suivants: ");
-    printf ("\n1: 'Algebre' \n2: 'Analyse'\n3: 'Electromagnetisme'\n4: 'Thermodynamique'\n5: 'SI'\n6: 'Informatique'\n");
-    printf ("7: 'Algorithmique'\n8: 'Anglais'\n9: 'Communication'\n10: 'Espagnol'\n11: 'Allemand'\n12: 'Francais'\n13: 'Chinois'\n");
+    printf("Entrer la matière où vous souhaitez saisir une note parmi les choix suivants: \n");
+    menu_matieres();
 
     while (matiere<1 || matiere>13)
     {
@@ -216,7 +214,7 @@ void afficher_bulletin(MYSQL *con)
 		"SELECT mat_nom, bull_note, bull_appreciation FROM Bulletin \
 		INNER JOIN Utilisateurs ON bull_eleve = user_id \
 		INNER JOIN Matiere on mat_id = bull_matiere WHERE bull_eleve = %d \
-		AND bull_annee = '%s' AND bull_semestre = %d;",
+		AND bull_annee = '%s' AND bull_semestre = %d ORDER BY mat_id;",
 		id, annee, semestre);
 
     if (mysql_query(con, request))
@@ -233,7 +231,7 @@ void afficher_bulletin(MYSQL *con)
     MYSQL_ROW row;
     effacer_console(1);
     // Concaténation de toutes les infos
-    sprintf(affichage, "\t\tBULLETIN de %s %s | %s - semestre %d \n", eleve.prenom, eleve.nom, annee, semestre);
+    sprintf(affichage, "|\tBulletin de %s %s | %s - semestre %d", eleve.prenom, eleve.nom, annee, semestre);
     printf("======================================================================\n");
     printf("%-*s\n",50, affichage);
     printf("======================================================================\n");
@@ -283,7 +281,7 @@ void afficher_bulletin_eleve(MYSQL *con,  struct Utilisateur user)
 
     MYSQL_ROW row;
     effacer_console(1);
-    sprintf(affichage, "\t\tBULLETIN  | %s - semestre %d \n", annee, semestre); // Création ligne à afficher
+    sprintf(affichage, "\t\tBULLETIN  | %s - semestre %d", annee, semestre); // Création ligne à afficher
     printf("======================================================================\n");
     printf("%-*s\n",50, affichage);
     printf("======================================================================\n");

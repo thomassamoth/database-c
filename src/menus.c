@@ -1,19 +1,16 @@
 
 #include "../include/menus.h"
-#include "../include/utilisateur.h"
-#include "../include/affichage.h"
-#include "../include/main.h"
-#include "../include/bulletin.h"
+
 
 /* === FONCTIONS AFFICHAGE MENUS === */
 
 int menu_classe()
 {
     int i;
-    printf("\t1 - Mauve\n");
-    printf("\t2 - Bleue\n");
-    printf("\t3 - Ivoire\n");
-    printf("\t4 - Verte\n");
+    printf("%s\t1 - Mauve\n%s", COLOR_MAGENTA, COLOR_RESET);
+    printf("%s\t2 - Bleue\n%s", COLOR_CYAN, COLOR_RESET);
+    printf("%s\t3 - Ivoire\n%s", COLOR_WHITE, COLOR_RESET);
+    printf("%s\t4 - Verte\n%s", COLOR_GREEN, COLOR_RESET);
     printf("Choix : ");
     scanf("%d",&i);
     printf("\n");
@@ -133,7 +130,7 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
                 break;
 
             case 0:
-                printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
+                printf("%sDéconnexion réussie\n%s",COLOR_YELLOW, COLOR_RESET);
                 effacer_console(1);
                 break;
             default :
@@ -162,7 +159,7 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
                 break;
 
             case 0:
-                printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
+                printf("%sDéconnexion réussie\n%s", COLOR_YELLOW, COLOR_RESET);
                 effacer_console(1);
                 break;
             default:
@@ -183,7 +180,7 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
             switch(menu_ens)
             {
             case 0:
-                printf(COLOR_YELLOW "Déconnexion réussie\n" COLOR_RESET);
+                printf("%sDéconnexion réussie\n%s", COLOR_YELLOW, COLOR_RESET);
                 effacer_console(1);
                 break;
             case 1:
@@ -205,4 +202,21 @@ void menus_connexion(char * statut, MYSQL *con, struct Utilisateur user)
 
     }
     free(statut); // on libère la mémoire de statut
+}
+
+void menu_matieres()
+{
+    printf("\t1: Algebre\n");
+    printf("\t2: Analyse\n");
+    printf("\t3: Electromagnetisme\n");
+    printf("\t4: Thermodynamique\n");
+    printf("\t5: SI\n");
+    printf("\t6: Informatique\n");
+    printf("\t7: Algorithmique\n");
+    printf("\t8: Anglais\n");
+    printf("\t9: Communication\n");
+    printf("\t10: Espagnol\n");
+    printf("\t11: Allemand\n");
+    printf("\t12: Francais\n");
+    printf("\t13: Chinois\n");
 }
