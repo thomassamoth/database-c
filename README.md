@@ -23,9 +23,10 @@
  - [X] Un utilisateur peut se connecter et accéder aux fonctionnalités disponibles pour son statut
  - [X] Une personne du secrétariat peut créer un compte  
 ## Utilisation  
- * **Installer** la librairie MySQL avec `sudo apt install default-libmysqlclient-dev`
- * Après connexion au serveur SQL, **executer** le script SQL avec `source esigelec.sql`  
- * **Compiler le projet** : 
-     * executer la commande `make`  
-ou
-     * utiliser le projet [CodeBlocks](https://www.codeblocks.org/)
+ * **Installer** la librairie MySQL avec ```sudo apt install default-libmysqlclient-dev```
+ * Après connexion au serveur SQL, **exécuter** le script SQL avec `source esigelec.sql`  
+ #### **Compiler le projet** : 
+1. Créer un dossier vide `obj`  
+2. Exécuter la commande `make`  
+**ou**  
+3. Utiliser le projet [CodeBlocks](https://www.codeblocks.org/)
