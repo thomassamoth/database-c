@@ -1,0 +1,9 @@
+.vscode
+credentials.json
+bdd
+bin/
+*.o
+*.lib
+*.a
+*.depend
+*.layout
