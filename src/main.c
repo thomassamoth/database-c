@@ -1,5 +1,4 @@
 
-
 #include "../include/main.h"
 #include "../include/utilisateur.h"
 #include "../include/menus.h"
@@ -10,16 +9,35 @@
 
 int main()
 {
+    // Get the credentials to connect to the database server
+    char buffer[1024];
+	struct json_object *parsed_json;
+	struct json_object *database_username;
+    struct json_object *database_password;
+
+    // Read the JSON FILE
+	FILE *fichier = fopen("credentials.json","r");
+	fread(buffer, 1024, 1, fichier);
+	fclose(fichier);
+
+    parsed_json = json_tokener_parse(buffer);
+
+    // Get the associated values
+	json_object_object_get_ex(parsed_json, "username_database", &database_username);
+	json_object_object_get_ex(parsed_json, "password_database", &database_password);
+
     /*  == Initialisation Database ==*/
     MYSQL *con = mysql_init(NULL);
     if(con == NULL)
     {
-        fprintf(stderr, "mysql_init() failed\n");
+        fprintf(stderr, "%s\n", mysql_error(con));
+        //fprintf(stderr, "mysql_init() failed\n");
         return(1);
     }
 
-    if(mysql_real_connect(con, "localhost", "esigelec", "esigelec", "Esigelec", 0, NULL, 0) == NULL)
+    if(mysql_real_connect(con, "localhost", json_object_get_string(database_username), json_object_get_string(database_password), "Esigelec", 0, NULL, 0) == NULL)
     {
+        fprintf(stderr, "%s\n", mysql_error(con));
         return(1);
     }
 

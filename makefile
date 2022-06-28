@@ -3,7 +3,7 @@
 # Compiler settings - Can be customized.
 CC = gcc
 CXXFLAGS = -std=c11 -Wall
-LDFLAGS = -lmysqlclient
+LDFLAGS = -lmysqlclient -ljson-c
 
 # Makefile settings
 APPNAME = bdd

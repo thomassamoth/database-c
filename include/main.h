@@ -3,11 +3,13 @@
 
 #include <mysql/mysql.h>
 #include<stdlib.h>
-#include <stdio.h>
+#include<stdio.h>
 #include<string.h>
-#include <unistd.h> //pause
-#include <time.h>
-#include <stdio_ext.h> //fpurge
+#include<unistd.h> //pause
+#include<time.h>
+#include<stdio_ext.h> //fpurge
+#include<json-c/json.h> // get the credentials to connect to the database
+
 
 
 // Enregistrements
