@@ -22,11 +22,12 @@
  - [X] Un élève peut consulter ses bulletins (année par année / semestre par semestre)
  - [X] Un utilisateur peut se connecter et accéder aux fonctionnalités disponibles pour son statut
  - [X] Une personne du secrétariat peut créer un compte  
-## Utilisation  
- * **Installer** la librairie MySQL avec ```sudo apt install default-libmysqlclient-dev```
- * Après connexion au serveur SQL, **exécuter** le script SQL avec `source esigelec.sql`  
- #### **Compiler le projet** : 
-1. Créer un dossier vide `obj`  
-2. Exécuter la commande `make`  
-**ou**  
-3. Utiliser le projet [CodeBlocks](https://www.codeblocks.org/)
+## Utilisation
+#### Prérequis
+ * Installer la librairie MySQL avec ```sudo apt install default-libmysqlclient-dev```
+ * Installer la librairie [JSON-C](https://github.com/json-c/json-c) avec ``` sudo apt install libjson-c-dev```.
+ * Après connexion au serveur SQL, **exécuter** le script SQL avec `source esigelec.sql`.
+   
+ * Renommer `credentials-template.json` en `credentials.json` et modifier les identifiants.  
+ #### **Compiler le projet** 
+- Exécuter la commande `make` pour compiler le projet
