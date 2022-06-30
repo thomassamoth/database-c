@@ -42,7 +42,7 @@ CREATE TABLE Classe (
 )
 ENGINE = INNODB;
 
--- quelle élève est dans quelle classe OU quel professeur enseigne dans quelle classe
+-- quel élève est dans quelle classe OU quel professeur enseigne dans quelle classe
 CREATE TABLE Personne_Classe ( 
     id_personne INT UNSIGNED NOT NULL,
     classe_id INT UNSIGNED NOT NULL,
