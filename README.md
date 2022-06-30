@@ -31,11 +31,30 @@ possible à un enseignant de modifier ses appréciations, ...
 
 ### Prérequis
 
-- Installer la librairie MySQL avec ```sudo apt install default-libmysqlclient-dev```.
-- Installer la librairie [JSON-C](https://github.com/json-c/json-c) avec ```sudo apt install libjson-c-dev```.
-- Après connexion au serveur SQL, **exécuter** le script SQL avec `source esigelec.sql`.  
+- Installer la librairie MySQL avec :
+
+```bash
+sudo apt install default-libmysqlclient-dev
+```
+
+- Installer la librairie [JSON-C](https://github.com/json-c/json-c) : 
+
+```bash
+sudo apt install libjson-c-dev
+```
+
+- Après connexion au serveur SQL, **exécuter** le script SQL :
+
+``` sql
+source esigelec.sql
+```  
+
 - Renommer `credentials-template.json` en `credentials.json` et modifier les identifiants.  
 
-### Compilation
+### :rocket: Compilation
 
-- Exécuter la commande `make` pour compiler le projet
+- Pour compiler le projet, il suffit d'exécuter :
+
+``` bash
+make
+```

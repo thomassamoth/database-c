@@ -1,19 +1,16 @@
-
 #include "../include/main.h"
 #include "../include/utilisateur.h"
 #include "../include/menus.h"
 #include "../include/affichage.h"
 #include "../include/bulletin.h"
 
-/* == FONCTIONS == */
-
-int main()
+// Get the info to connect to the database server
+char *get_db_infos(char info_to_get[])
 {
-    // Get the credentials to connect to the database server
+    char * info = malloc(1024);
     char buffer[1024];
 	struct json_object *parsed_json;
-	struct json_object *database_username;
-    struct json_object *database_password;
+	struct json_object *database_info;
 
     // Read the JSON FILE
 	FILE *fichier = fopen("credentials.json","r");
@@ -21,21 +18,31 @@ int main()
 	fclose(fichier);
 
     parsed_json = json_tokener_parse(buffer);
-
     // Get the associated values
-	json_object_object_get_ex(parsed_json, "username_database", &database_username);
-	json_object_object_get_ex(parsed_json, "password_database", &database_password);
+	json_object_object_get_ex(parsed_json, info_to_get, &database_info);
+
+    strcpy(info,json_object_get_string(database_info)); // copy into final vari
+    return info; 
+    free(info);
+}
+
+
+int main()
+{
+    // Get the credentials to connect to the database server
+    char *username_database = get_db_infos("username_database");
+    char *password_database = get_db_infos("password_database");
+
 
     /*  == Initialisation Database ==*/
     MYSQL *con = mysql_init(NULL);
     if(con == NULL)
     {
         fprintf(stderr, "%s\n", mysql_error(con));
-        //fprintf(stderr, "mysql_init() failed\n");
         return(1);
     }
 
-    if(mysql_real_connect(con, "localhost", json_object_get_string(database_username), json_object_get_string(database_password), "Esigelec", 0, NULL, 0) == NULL)
+    if(mysql_real_connect(con, "localhost", username_database, password_database, "Esigelec", 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "%s\n", mysql_error(con));
         return(1);
