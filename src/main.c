@@ -5,7 +5,7 @@
 #include "../include/bulletin.h"
 
 // Get the info to connect to the database server
-char *get_db_infos(char info_to_get[])
+char *get_db_info(char info_to_get[])
 {
     char * info = malloc(1024);
     char buffer[1024];
@@ -30,8 +30,9 @@ char *get_db_infos(char info_to_get[])
 int main()
 {
     // Get the credentials to connect to the database server
-    char *username_database = get_db_infos("username_database");
-    char *password_database = get_db_infos("password_database");
+    char *username_database = get_db_info("username_database");
+    char *password_database = get_db_info("password_database");
+    char *name_database = get_db_info("database_name");
 
 
     /*  == Initialisation Database ==*/
@@ -42,11 +43,12 @@ int main()
         return(1);
     }
 
-    if(mysql_real_connect(con, "localhost", username_database, password_database, "Esigelec", 0, NULL, 0) == NULL)
+    if(mysql_real_connect(con, "localhost", username_database, password_database, name_database, 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "%s\n", mysql_error(con));
         return(1);
     }
+    else
 
     /* == MENU PRINCIPAL == */
     effacer_console(0);
