@@ -1,6 +1,6 @@
 # 🎓 Bulletins - C | MySQL
 
-[![Version](https://img.shields.io/badge/version-v1.2.0-informational)](https://github.com/thomassamoth/database-c/releases/tag/v1.2.0)  
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/thomassamoth/database-c?label=version)  
 Écrire en C un programme permettant au secrétariat du CPII de gérer les
 bulletins.  
 Le secrétariat doit pouvoir saisir les informations suivantes :
